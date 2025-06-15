@@ -1,0 +1,73 @@
+plugins {
+    id 'java'
+    id 'org.jetbrains.kotlin.jvm' version '1.9.22'
+    id 'com.github.davidmc24.gradle.plugin.avro' version '1.9.1'
+}
+
+group = 'org.example'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+// Create a new configuration for Avro
+configurations {
+    avroDeps
+    compileOnlyResolvable {
+        canBeResolved = true
+        canBeConsumed = false
+        extendsFrom compileOnly
+    }
+}
+
+dependencies {
+    implementation 'org.apache.avro:avro:1.11.3'
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib'
+    implementation 'org.jetbrains:annotations:24.1.0'
+    implementation 'com.github.javaparser:javaparser-core:3.25.5'
+    compileOnly 'javax.annotation:javax.annotation-api:1.3.2'
+    annotationProcessor 'javax.annotation:javax.annotation-api:1.3.2'
+    
+    // Add dependencies to the Avro configuration
+    avroDeps 'javax.annotation:javax.annotation-api:1.3.2'
+    
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+avro {
+    createSetters = true
+    fieldVisibility = "PRIVATE"
+    stringType = "String"
+    enableDecimalLogicalType = true
+}
+
+// Configure the Avro plugin to use our dependencies
+tasks.withType(com.github.davidmc24.gradle.plugin.avro.GenerateAvroJavaTask) {
+    classpath += configurations.avroDeps
+}
+
+// Make generateAvroJava depend on buildSrc compilation
+tasks.named('generateAvroJava').configure {
+    doLast {
+        javaexec {
+            mainClass = 'org.example.AvroClassProcessor'
+            classpath = files("${project.rootDir}/buildSrc/build/classes/java/main") + sourceSets.main.runtimeClasspath
+            args = [
+                "${project.buildDir}/generated-main-avro-java",
+                "src/main/avro/Person.avsc"
+            ]
+        }
+    }
+}
+
+sourceSets {
+    main {
+        compileClasspath += configurations.compileOnlyResolvable
+    }
+}
