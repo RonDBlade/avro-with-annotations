@@ -44,7 +44,8 @@ The project includes a simple `Person` schema with:
     },
     {
       "name": "age",
-      "type": ["null", "int"]
+      "type": ["null", "int"],
+      "default": null
     }
   ]
 }
