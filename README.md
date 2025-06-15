@@ -5,7 +5,7 @@ This project demonstrates how to generate Java classes from Avro schema files (A
 ## Features
 
 - Generates Java classes from Avro schema files
-- Automatically adds `@Nonnull` and `@Nullable` annotations based on the Avro schema
+- Automatically adds `@NotNull` and `@Nullable` annotations based on the Avro schema
 - Uses JavaParser to modify the generated code
 - Includes Kotlin tests to verify nullability behavior
 
@@ -26,12 +26,36 @@ This project demonstrates how to generate Java classes from Avro schema files (A
 └── build.gradle                # Build configuration
 ```
 
+## Example Schema
+
+The project includes a simple `Person` schema with:
+- `id` (string, required, non-nullable)
+- `age` (int, optional, nullable)
+
+```json
+{
+  "type": "record",
+  "name": "Person",
+  "namespace": "com.example",
+  "fields": [
+    {
+      "name": "id",
+      "type": "string"
+    },
+    {
+      "name": "age",
+      "type": ["null", "int"]
+    }
+  ]
+}
+```
+
 ## How It Works
 
 1. The Avro plugin generates Java classes from AVSC files
 2. Our custom processor (`AvroClassProcessor`) adds nullability annotations:
-   - `@Nonnull` for required fields
-   - `@Nullable` for optional fields (fields that can be null in the Avro schema)
+   - `@NotNull` for required fields (like `id`)
+   - `@Nullable` for optional fields (like `age`)
 3. The generated classes can be used in Kotlin with proper nullability checking
 
 ## Building
@@ -42,13 +66,15 @@ This project demonstrates how to generate Java classes from Avro schema files (A
 
 ## Testing
 
-The project includes Kotlin tests that verify the nullability behavior of the generated classes.
+The project includes Kotlin tests that verify the nullability behavior of the generated classes. For example:
+- `id` field is non-nullable and must be set
+- `age` field is nullable and can be set to null
 
 ## Dependencies
 
 - Apache Avro
 - JavaParser
-- javax.annotation-api
+- JetBrains Annotations
 - Kotlin
 - JUnit 5
 
