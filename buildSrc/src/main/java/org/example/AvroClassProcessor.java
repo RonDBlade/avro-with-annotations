@@ -2,9 +2,14 @@ package org.example;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.MarkerAnnotationExpr;
+import com.github.javaparser.ast.nodeTypes.modifiers.NodeWithPublicModifier;
+import com.github.javaparser.javadoc.Javadoc;
+import com.github.javaparser.javadoc.JavadocBlockTag;
+import com.github.javaparser.javadoc.description.JavadocDescription;
 import org.apache.avro.Schema;
 
 import java.io.File;
@@ -15,9 +20,11 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 
+@Deprecated
 public class AvroClassProcessor {
     private static final String NOT_NULL_ANNOTATION = "org.jetbrains.annotations.NotNull";
     private static final String NULLABLE_ANNOTATION = "org.jetbrains.annotations.Nullable";
+    private static final String DEPRECATED_ANNOTATION = "java.lang.Deprecated";
 
     public static void processGeneratedClass(File javaFile, Schema avroSchema) throws IOException {
         try (FileInputStream in = new FileInputStream(javaFile)) {
@@ -25,25 +32,36 @@ public class AvroClassProcessor {
             CompilationUnit cu = javaParser.parse(in).getResult().orElseThrow(() -> new RuntimeException("Failed to parse Java file"));
             cu.addImport(NOT_NULL_ANNOTATION);
             cu.addImport(NULLABLE_ANNOTATION);
-            List<FieldDeclaration> fields = cu.findAll(FieldDeclaration.class);
-//            System.out.println(fields);
-            for (FieldDeclaration field : fields) {
-                System.out.println("variables: " + field.getVariables());
-                String fieldName = field.getVariable(0).getNameAsString();
-                System.out.println(fieldName);
-                Schema.Field avroField = avroSchema.getField(fieldName);
-                if (avroField != null) {
-                    boolean isNullable = isNullable(avroField.schema());
-                    addNullabilityAnnotation(field, isNullable);
-                    // Annotate getter method
-                    List<String> methodsAddedAnnot = new java.util.ArrayList<>();
-                    String getterName = "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
-                    cu.findAll(MethodDeclaration.class).stream()
-                        .filter(m -> m.getNameAsString().equals(getterName) && m.getParameters().isEmpty())
-                            .peek(m -> methodsAddedAnnot.add(m.getNameAsString()))
-                        .forEach(m -> addNullabilityAnnotationToMethod(m, isNullable));
+            cu.addImport(DEPRECATED_ANNOTATION);
+            cu.findAll(ConstructorDeclaration.class).stream()
+                    .filter(NodeWithPublicModifier::isPublic)
+                    .forEach(constructor -> {
+                        constructor.addAnnotation(new MarkerAnnotationExpr(DEPRECATED_ANNOTATION));
+                        Javadoc newJavadoc = constructor.getJavadoc().orElseGet(() -> new Javadoc(JavadocDescription.parseText("")));
+                        newJavadoc.addBlockTag(new JavadocBlockTag("deprecated", "Do not use this constructor, use .newBuilder() instead"));
+                        constructor.setJavadocComment(newJavadoc);
+                    });
 
-                    System.out.println(methodsAddedAnnot);
+            List<FieldDeclaration> fields = cu.findAll(FieldDeclaration.class);
+            for (FieldDeclaration field : fields) {
+                // Only process fields whose parent is the top-level class
+                if (field.getParentNode().isPresent() && field.getParentNode().get() instanceof com.github.javaparser.ast.body.ClassOrInterfaceDeclaration) {
+                    com.github.javaparser.ast.body.ClassOrInterfaceDeclaration parentClass =
+                        (com.github.javaparser.ast.body.ClassOrInterfaceDeclaration) field.getParentNode().get();
+                    // Only process if the parent class is top-level (not nested)
+                    if (!parentClass.isNestedType()) {
+                        String fieldName = field.getVariable(0).getNameAsString();
+                        Schema.Field avroField = avroSchema.getField(fieldName);
+                        if (avroField != null) {
+                            boolean isNullable = isNullable(avroField.schema());
+                            addNullabilityAnnotation(field, isNullable);
+                            // Annotate getter method
+                            String getterName = "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
+                            cu.findAll(MethodDeclaration.class).stream()
+                                .filter(m -> m.getNameAsString().equals(getterName) && m.getParameters().isEmpty())
+                                .forEach(m -> addNullabilityAnnotationToMethod(m, isNullable));
+                        }
+                    }
                 }
             }
             try (FileWriter writer = new FileWriter(javaFile)) {
