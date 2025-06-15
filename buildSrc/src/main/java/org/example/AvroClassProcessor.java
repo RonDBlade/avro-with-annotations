@@ -5,6 +5,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.expr.MarkerAnnotationExpr;
 import com.github.javaparser.ast.nodeTypes.modifiers.NodeWithPublicModifier;
 import com.github.javaparser.javadoc.Javadoc;
@@ -44,24 +45,30 @@ public class AvroClassProcessor {
 
             List<FieldDeclaration> fields = cu.findAll(FieldDeclaration.class);
             for (FieldDeclaration field : fields) {
-                // Only process fields whose parent is the top-level class
-                if (field.getParentNode().isPresent() && field.getParentNode().get() instanceof com.github.javaparser.ast.body.ClassOrInterfaceDeclaration) {
-                    com.github.javaparser.ast.body.ClassOrInterfaceDeclaration parentClass =
-                        (com.github.javaparser.ast.body.ClassOrInterfaceDeclaration) field.getParentNode().get();
-                    // Only process if the parent class is top-level (not nested)
-                    if (!parentClass.isNestedType()) {
-                        String fieldName = field.getVariable(0).getNameAsString();
-                        Schema.Field avroField = avroSchema.getField(fieldName);
-                        if (avroField != null) {
-                            boolean isNullable = isNullable(avroField.schema());
-                            addNullabilityAnnotation(field, isNullable);
-                            // Annotate getter method
-                            String getterName = "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
-                            cu.findAll(MethodDeclaration.class).stream()
-                                .filter(m -> m.getNameAsString().equals(getterName) && m.getParameters().isEmpty())
-                                .forEach(m -> addNullabilityAnnotationToMethod(m, isNullable));
-                        }
-                    }
+                // Skip fields inside nested classes (like Builder)
+                if (field.getParentNode().isPresent() && field.getParentNode().get().getParentNode().isPresent() && field.getParentNode().get().getParentNode().get().getClass().getSimpleName().equals("ClassOrInterfaceDeclaration")) {
+                    continue;
+                }
+                String fieldName = field.getVariable(0).getNameAsString();
+                Schema.Field avroField = avroSchema.getField(fieldName);
+                if (avroField != null) {
+                    boolean isNullable = isNullable(avroField.schema());
+                    addNullabilityAnnotation(field, isNullable);
+                    // Annotate getter method
+                    String getterName = "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
+                    cu.findAll(MethodDeclaration.class).stream()
+                        .filter(m -> m.getNameAsString().equals(getterName) && m.getParameters().isEmpty())
+                        .forEach(m -> addNullabilityAnnotationToMethod(m, isNullable));
+                    // Annotate Builder setter method parameter
+                    String setterName = "set" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
+                    cu.findAll(MethodDeclaration.class).stream()
+                        .filter(m -> m.getNameAsString().equals(setterName) && m.getParameters().size() == 1)
+                        .forEach(m -> {
+                            Parameter param = m.getParameter(0);
+                            addNullabilityAnnotationToParameter(param, isNullable);
+                            // Annotate the setter method itself with @NotNull
+                            addNullabilityAnnotationToMethod(m, false);
+                        });
                 }
             }
             try (FileWriter writer = new FileWriter(javaFile)) {
@@ -85,6 +92,11 @@ public class AvroClassProcessor {
     private static void addNullabilityAnnotationToMethod(MethodDeclaration method, boolean isNullable) {
         String annotationName = isNullable ? NULLABLE_ANNOTATION : NOT_NULL_ANNOTATION;
         method.addAnnotation(new MarkerAnnotationExpr(annotationName));
+    }
+
+    private static void addNullabilityAnnotationToParameter(Parameter parameter, boolean isNullable) {
+        String annotationName = isNullable ? NULLABLE_ANNOTATION : NOT_NULL_ANNOTATION;
+        parameter.addAnnotation(new MarkerAnnotationExpr(annotationName));
     }
 
     public static void main(String[] args) throws IOException {

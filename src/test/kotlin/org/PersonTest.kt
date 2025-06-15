@@ -8,9 +8,7 @@ class PersonTest {
     @Test
     fun testPersonNullability() {
         // Create a person with required fields
-        val person = Person()
-        person.id = "123"
-        
+        val person = Person.newBuilder().setId("123").build()
         // Required field should be non-null
         assertEquals("123", person.id)
         
