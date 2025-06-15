@@ -27,6 +27,16 @@ public class AvroClassProcessor {
     private static final String NULLABLE_ANNOTATION = "org.jetbrains.annotations.Nullable";
     private static final String DEPRECATED_ANNOTATION = "java.lang.Deprecated";
 
+    /**
+     * Processes a generated Java class file to add nullability annotations to fields, getter methods, and setter methods.
+     * This method reads the Java file, parses it using JavaParser, and then adds appropriate annotations based on the Avro schema.
+     * It annotates fields and their corresponding getter and setter methods with @NotNull or @Nullable based on the field's nullability in the Avro schema.
+     * Additionally, it marks public constructors as deprecated and updates their Javadoc.
+     *
+     * @param javaFile The Java file to process.
+     * @param avroSchema The Avro schema used to determine field nullability.
+     * @throws IOException If an I/O error occurs while reading or writing the file.
+     */
     public static void processGeneratedClass(File javaFile, Schema avroSchema) throws IOException {
         try (FileInputStream in = new FileInputStream(javaFile)) {
             JavaParser javaParser = new JavaParser();
@@ -45,30 +55,28 @@ public class AvroClassProcessor {
 
             List<FieldDeclaration> fields = cu.findAll(FieldDeclaration.class);
             for (FieldDeclaration field : fields) {
-                // Skip fields inside nested classes (like Builder)
-                if (field.getParentNode().isPresent() && field.getParentNode().get().getParentNode().isPresent() && field.getParentNode().get().getParentNode().get().getClass().getSimpleName().equals("ClassOrInterfaceDeclaration")) {
-                    continue;
-                }
                 String fieldName = field.getVariable(0).getNameAsString();
                 Schema.Field avroField = avroSchema.getField(fieldName);
                 if (avroField != null) {
                     boolean isNullable = isNullable(avroField.schema());
                     addNullabilityAnnotation(field, isNullable);
-                    // Annotate getter method
-                    String getterName = "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
-                    cu.findAll(MethodDeclaration.class).stream()
-                        .filter(m -> m.getNameAsString().equals(getterName) && m.getParameters().isEmpty())
-                        .forEach(m -> addNullabilityAnnotationToMethod(m, isNullable));
-                    // Annotate Builder setter method parameter
-                    String setterName = "set" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
-                    cu.findAll(MethodDeclaration.class).stream()
-                        .filter(m -> m.getNameAsString().equals(setterName) && m.getParameters().size() == 1)
-                        .forEach(m -> {
-                            Parameter param = m.getParameter(0);
-                            addNullabilityAnnotationToParameter(param, isNullable);
-                            // Annotate the setter method itself with @NotNull
-                            addNullabilityAnnotationToMethod(m, false);
-                        });
+                    // Annotate getter method only if the field is not part of an inner class
+                    if (!(field.getParentNode().isPresent() && field.getParentNode().get().getParentNode().isPresent() && field.getParentNode().get().getParentNode().get().getClass().getSimpleName().equals("ClassOrInterfaceDeclaration"))) {
+                        String getterName = "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
+                        cu.findAll(MethodDeclaration.class).stream()
+                            .filter(m -> m.getNameAsString().equals(getterName) && m.getParameters().isEmpty())
+                            .forEach(m -> addNullabilityAnnotationToMethod(m, isNullable));
+                        // Annotate Builder setter method parameter
+                        String setterName = "set" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
+                        cu.findAll(MethodDeclaration.class).stream()
+                            .filter(m -> m.getNameAsString().equals(setterName) && m.getParameters().size() == 1)
+                            .forEach(m -> {
+                                Parameter param = m.getParameter(0);
+                                addNullabilityAnnotationToParameter(param, isNullable);
+                                // Annotate the setter method itself with @NotNull
+                                addNullabilityAnnotationToMethod(m, false);
+                            });
+                    }
                 }
             }
             try (FileWriter writer = new FileWriter(javaFile)) {
