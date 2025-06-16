@@ -2,10 +2,12 @@ package org.example;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
+import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.MarkerAnnotationExpr;
 import com.github.javaparser.ast.nodeTypes.modifiers.NodeWithPublicModifier;
 import com.github.javaparser.javadoc.Javadoc;
@@ -21,11 +23,13 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 
-@Deprecated
 public class AvroClassProcessor {
     private static final String NOT_NULL_ANNOTATION = "org.jetbrains.annotations.NotNull";
     private static final String NULLABLE_ANNOTATION = "org.jetbrains.annotations.Nullable";
     private static final String DEPRECATED_ANNOTATION = "java.lang.Deprecated";
+    private static final String BUILD_METHOD_NAME = "build";
+    private static final String NEW_BUILD_METHOD_NAME = "newBuilder";
+
 
     /**
      * Processes a generated Java class file to add nullability annotations to fields, getter methods, and setter methods.
@@ -46,6 +50,7 @@ public class AvroClassProcessor {
             cu.addImport(DEPRECATED_ANNOTATION);
             cu.findAll(ConstructorDeclaration.class).stream()
                     .filter(NodeWithPublicModifier::isPublic)
+                    .filter(constructor -> !hasAnnotation(constructor.getAnnotations(), DEPRECATED_ANNOTATION))
                     .forEach(constructor -> {
                         constructor.addAnnotation(new MarkerAnnotationExpr(DEPRECATED_ANNOTATION));
                         Javadoc newJavadoc = constructor.getJavadoc().orElseGet(() -> new Javadoc(JavadocDescription.parseText("")));
@@ -66,6 +71,10 @@ public class AvroClassProcessor {
                         cu.findAll(MethodDeclaration.class).stream()
                             .filter(m -> m.getNameAsString().equals(getterName) && m.getParameters().isEmpty())
                             .forEach(m -> addNullabilityAnnotationToMethod(m, isNullable));
+                        String clearerName = "clear" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
+                        cu.findAll(MethodDeclaration.class).stream()
+                                .filter(m -> m.getNameAsString().equals(clearerName) && m.getParameters().isEmpty())
+                                .forEach(m -> addNullabilityAnnotationToMethod(m, false));
                         // Annotate Builder setter method parameter
                         String setterName = "set" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
                         cu.findAll(MethodDeclaration.class).stream()
@@ -79,6 +88,20 @@ public class AvroClassProcessor {
                     }
                 }
             }
+
+            cu.findAll(MethodDeclaration.class).stream()
+                    .filter(m -> m.getNameAsString().equals(BUILD_METHOD_NAME) && m.getParameters().isEmpty())
+                    .forEach(m -> addNullabilityAnnotationToMethod(m, false));
+            cu.findAll(MethodDeclaration.class).stream()
+                    .filter(m -> m.getNameAsString().equals(NEW_BUILD_METHOD_NAME))
+                    .forEach(m -> addNullabilityAnnotationToMethod(m, false));
+            cu.findAll(MethodDeclaration.class).stream()
+                    .filter(m -> m.getNameAsString().equals(NEW_BUILD_METHOD_NAME) && !m.getParameters().isEmpty())
+                    .forEach(m -> {
+                        Parameter param = m.getParameter(0);
+                        addNullabilityAnnotationToParameter(param, true);
+                    });
+
             try (FileWriter writer = new FileWriter(javaFile)) {
                 writer.write(cu.toString());
             }
@@ -94,17 +117,28 @@ public class AvroClassProcessor {
 
     private static void addNullabilityAnnotation(FieldDeclaration field, boolean isNullable) {
         String annotationName = isNullable ? NULLABLE_ANNOTATION : NOT_NULL_ANNOTATION;
-        field.addAnnotation(new MarkerAnnotationExpr(annotationName));
+        field.getAnnotations().stream().forEach(annotation -> System.out.println(annotation.getNameAsString()));
+        if (!hasAnnotation(field.getAnnotations(), annotationName)) {
+            field.addAnnotation(new MarkerAnnotationExpr(annotationName));
+        }
     }
 
     private static void addNullabilityAnnotationToMethod(MethodDeclaration method, boolean isNullable) {
         String annotationName = isNullable ? NULLABLE_ANNOTATION : NOT_NULL_ANNOTATION;
-        method.addAnnotation(new MarkerAnnotationExpr(annotationName));
+        if (!hasAnnotation(method.getAnnotations(), annotationName)) {
+            method.addAnnotation(new MarkerAnnotationExpr(annotationName));
+        }
     }
 
     private static void addNullabilityAnnotationToParameter(Parameter parameter, boolean isNullable) {
         String annotationName = isNullable ? NULLABLE_ANNOTATION : NOT_NULL_ANNOTATION;
-        parameter.addAnnotation(new MarkerAnnotationExpr(annotationName));
+        if (!hasAnnotation(parameter.getAnnotations(), annotationName)) {
+            parameter.addAnnotation(new MarkerAnnotationExpr(annotationName));
+        }
+    }
+
+    private static boolean hasAnnotation(NodeList<AnnotationExpr> annotations, String annotationName) {
+        return annotations.stream().anyMatch(annotation -> annotation.getNameAsString().equals(annotationName));
     }
 
     public static void main(String[] args) throws IOException {
