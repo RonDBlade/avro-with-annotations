@@ -13,15 +13,13 @@ This project demonstrates how to generate Java classes from Avro schema files (A
 
 ```
 .
-├── buildSrc/                    # Build-time utilities
-│   └── src/main/java/org/example/
-│       └── AvroClassProcessor.java  # Processes generated classes
 ├── src/
 │   ├── main/
-│   │   ├── avro/               # Avro schema files
-│   │   │   └── Person.avsc     # Example schema
-│   │   └── kotlin/             # Kotlin source code
+│   │   └── java/org/example/
+│   │       └── AvroClassProcessor.java  # Processes generated classes
 │   └── test/
+│       ├── avro/               # Avro schema files
+│       │   └── Person.avsc     # Example schema
 │       └── kotlin/             # Kotlin tests
 └── build.gradle                # Build configuration
 ```
@@ -53,11 +51,33 @@ The project includes a simple `Person` schema with:
 
 ## How It Works
 
-1. The Avro plugin generates Java classes from AVSC files
+1. The Avro plugin generates Java classes from AVSC files in the test directory
 2. Our custom processor (`AvroClassProcessor`) adds nullability annotations:
    - `@NotNull` for required fields (like `id`)
    - `@Nullable` for optional fields (like `age`)
 3. The generated classes can be used in Kotlin with proper nullability checking
+
+## Task Execution Order
+
+The build process follows this order to ensure proper compilation and testing:
+
+1. `compileJava` - Compiles the `AvroClassProcessor` class
+2. `generateTestAvroJava` - Generates Java classes from the Avro schema in test directory
+3. `processAvroClasses` - Processes the generated classes to add nullability annotations
+4. `compileTestKotlin` - Compiles the Kotlin tests
+5. `test` - Runs the tests
+
+The task dependencies are configured in `build.gradle` to ensure this order is maintained:
+```gradle
+task processAvroClasses(type: JavaExec) {
+    dependsOn compileJava
+    dependsOn generateTestAvroJava
+    // ... task configuration
+}
+
+compileTestKotlin.dependsOn generateTestAvroJava
+compileTestKotlin.dependsOn processAvroClasses
+```
 
 ## Building
 
