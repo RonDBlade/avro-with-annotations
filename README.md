@@ -1,6 +1,8 @@
 # Avro with Nullability Annotations
 
-This project demonstrates how to generate Java classes from Avro schema files (AVSC) and automatically add nullability annotations to the generated classes. The annotations help Kotlin understand which fields can be null and which cannot.
+This project demonstrates how to generate Java classes from Avro schema files (AVSC) using the davidmc gradle plugin, and automatically add nullability annotations to the generated classes.
+For Kotlin users, the annotations help Kotlin understand which fields can be null and which cannot, in order to be able to handle types coming from java correctly.
+For Java users it helps them get warnings at compile time and IDE level for when they are using the generated objects incorrectly, as that is not provided by the plugin itself.
 
 ## Features
 
