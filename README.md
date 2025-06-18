@@ -1,97 +1,32 @@
-# Avro with Extended Annotations Plugin
+# Avro with Nullability Annotations
 
-This Gradle plugin provides enhanced Avro schema processing capabilities with support for annotations and custom processing. It automatically adds nullability annotations to generated Avro classes, making them more Kotlin-friendly and providing better compile-time safety for Java users.
-
-## Benefits
-
-### For Kotlin Users
-- The annotations help Kotlin understand which fields can be null and which cannot
-- Enables proper nullability checking when using the generated classes
-- Provides better IDE support and compile-time safety
-
-### For Java Users
-- Provides warnings at compile time and IDE level
-- Helps catch potential null pointer issues early
-- Improves code quality and maintainability
+This project demonstrates how to generate Java classes from Avro schema files (AVSC) using the davidmc gradle plugin, and automatically add nullability annotations to the generated classes.
+For Kotlin users, the annotations help Kotlin understand which fields can be null and which cannot, in order to be able to handle types coming from java correctly.
+For Java users it helps them get warnings at compile time and IDE level for when they are using the generated objects incorrectly, as that is not provided by the plugin itself.
 
 ## Features
 
 - Generates Java classes from Avro schema files
 - Automatically adds `@NotNull` and `@Nullable` annotations based on the Avro schema
 - Uses JavaParser to modify the generated code
-- Integration with Kotlin projects
-- Custom class processing capabilities
 - Includes Kotlin tests to verify nullability behavior
 
-## Using the Plugin
+## Project Structure
 
-### From Gradle Plugin Portal
-
-In your project's `build.gradle`:
-
-```groovy
-plugins {
-    id 'io.github.rondb.avro-annotations' version '0.1.0'
-}
+```
+.
+├── src/
+│   ├── main/
+│   │   └── java/org/example/
+│   │       └── AvroClassProcessor.java  # Processes generated classes
+│   └── test/
+│       ├── avro/               # Avro schema files
+│       │   └── Person.avsc     # Example schema
+│       └── kotlin/             # Kotlin tests
+└── build.gradle                # Build configuration
 ```
 
-### Local Development
-
-To use the plugin in another project during development:
-
-1. In your project's `settings.gradle`, add the local repository:
-```groovy
-pluginManagement {
-    repositories {
-        maven {
-            url = uri("${rootProject.projectDir}/../avro-with-annotations/build/repo")
-        }
-        gradlePluginPortal()
-        mavenCentral()
-    }
-}
-```
-
-2. In your project's `build.gradle`, add the required Avro plugin and apply our plugin:
-```groovy
-plugins {
-    id 'com.github.davidmc24.gradle.plugin.avro' version '1.9.1'
-    id 'io.github.rondb.avro-annotations'
-}
-```
-
-### Configuration
-
-The plugin automatically configures:
-- Avro schema generation with private fields and setters
-- Annotation processing
-- Test source set configuration
-- Required dependencies
-
-### Tasks
-
-The plugin adds the following tasks:
-- `processAvroClasses`: Processes generated Avro classes with annotations
-
-### Dependencies
-
-The plugin automatically adds the following dependencies:
-- Apache Avro
-- JetBrains Annotations
-- JavaParser Core
-
-## How It Works
-
-### Internal Processing
-
-1. The Avro plugin generates Java classes from AVSC files in the test directory, using the davidmc plugin
-2. The `AvroClassProcessor` adds nullability annotations:
-   - `@NotNull` for required fields (like `id`)
-   - `@Nullable` for optional fields (like `age`)
-   - Either of these annotaitons for methods and parameters in order to ensure compile time safety when calling getters, setters or using the Builder
-3. The generated classes can be used in Kotlin with proper nullability checking
-
-### Example Schema
+## Example Schema
 
 The project includes a simple `Person` schema with:
 - `id` (string, required, non-nullable)
@@ -116,7 +51,15 @@ The project includes a simple `Person` schema with:
 }
 ```
 
-### Task Execution Order
+## How It Works
+
+1. The Avro plugin generates Java classes from AVSC files in the test directory
+2. Our custom processor (`AvroClassProcessor`) adds nullability annotations:
+   - `@NotNull` for required fields (like `id`)
+   - `@Nullable` for optional fields (like `age`)
+3. The generated classes can be used in Kotlin with proper nullability checking
+
+## Task Execution Order
 
 The build process follows this order to ensure proper compilation and testing:
 
@@ -138,54 +81,25 @@ compileTestKotlin.dependsOn generateTestAvroJava
 compileTestKotlin.dependsOn processAvroClasses
 ```
 
-## Development
-
-### Building
+## Building
 
 ```bash
 ./gradlew build
 ```
 
-### Testing
+## Testing
 
-The project includes several otlin tests that verify the nullability behavior of the generated classes
+The project includes Kotlin tests that verify the nullability behavior of the generated classes. For example:
+- `id` field is non-nullable and must be set
+- `age` field is nullable and can be set to null
 
-```bash
-./gradlew test
-```
+## Dependencies
 
-### Publishing
-
-To publish the plugin to the Gradle Plugin Portal:
-
-1. Set up your Gradle Plugin Portal credentials in `~/.gradle/gradle.properties`:
-```properties
-gradle.publish.key=<your-api-key>
-gradle.publish.secret=<your-api-secret>
-```
-
-2. Publish the plugin:
-```bash
-./gradlew publishPlugins
-```
-
-## Project Structure
-
-```
-.
-├── src/
-│   ├── main/
-│   │   ├── java/org/example/
-│   │   │   ├── AvroAnnotationsPlugin.java  # Plugin implementation
-│   │   │   └── AvroClassProcessor.java     # Core processing logic
-│   │   └── resources/
-│   │       └── META-INF/gradle-plugins/    # Plugin metadata
-│   └── test/
-│       ├── avro/                           # Avro schema files
-│       │   └── Person.avsc                 # Example schema
-│       └── kotlin/                         # Kotlin tests
-└── build.gradle                            # Build configuration
-```
+- Apache Avro
+- JavaParser
+- JetBrains Annotations
+- Kotlin
+- JUnit 5
 
 ## License
 

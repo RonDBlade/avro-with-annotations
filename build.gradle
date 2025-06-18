@@ -1,33 +1,14 @@
-import com.github.davidmc24.gradle.plugin.avro.GenerateAvroJavaTask
-
 plugins {
     id 'java'
     id 'org.jetbrains.kotlin.jvm' version '1.9.22'
     id 'com.github.davidmc24.gradle.plugin.avro' version '1.9.1'
-    id 'java-gradle-plugin'
-    id 'maven-publish'
-    id 'com.gradle.plugin-publish' version '1.2.1'
 }
 
-group = 'io.github.rondb'
-version = '0.1.2'
+group = 'org.example'
+version = '1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
-}
-
-gradlePlugin {
-    website = 'https://github.com/rondb/avro-with-annotations'
-    vcsUrl = 'https://github.com/rondb/avro-with-annotations.git'
-    plugins {
-        avroAnnotationsPlugin {
-            id = 'io.github.rondb.avro-annotations'
-            implementationClass = 'org.example.AvroAnnotationsPlugin'
-            displayName = 'Avro Java Annotations Plugin'
-            description = 'A Gradle plugin that adds nullability annotations to generated Java classes from .avsc files'
-            tags = ['avro', 'kotlin', 'nullability', 'annotations']
-        }
-    }
 }
 
 // Create a new configuration for Avro
@@ -41,22 +22,19 @@ configurations {
 }
 
 dependencies {
-    implementation 'org.apache.avro:avro:1.11.4'
+    implementation 'org.apache.avro:avro:1.11.3'
     implementation 'org.jetbrains.kotlin:kotlin-stdlib'
     implementation 'org.jetbrains:annotations:24.1.0'
     implementation 'com.github.javaparser:javaparser-core:3.25.5'
     compileOnly 'org.jetbrains:annotations:24.1.0'
     annotationProcessor 'org.jetbrains:annotations:24.1.0'
     
-    // Add Gradle API for plugin development
-    compileOnly gradleApi()
-    
     // Add dependencies to the Avro configuration
     avroDeps 'org.jetbrains:annotations:24.1.0'
     
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
-    testImplementation 'org.apache.avro:avro:1.11.4'
+    testImplementation 'org.apache.avro:avro:1.11.3'
 }
 
 test {
@@ -71,25 +49,31 @@ avro {
 }
 
 // Configure the Avro plugin to use our dependencies
-tasks.withType(GenerateAvroJavaTask).configureEach {
+tasks.withType(com.github.davidmc24.gradle.plugin.avro.GenerateAvroJavaTask) {
     classpath += configurations.avroDeps
 }
 
 // Create a new task for processing Avro classes
-tasks.register('processAvroClasses', JavaExec) {
+task processAvroClasses(type: JavaExec) {
     dependsOn compileJava
     dependsOn generateTestAvroJava
     mainClass = 'org.example.AvroClassProcessor'
     classpath = sourceSets.main.runtimeClasspath
     args = [
-            "${project.buildDir}/generated-test-avro-java",
-            "src/test/avro/*.avsc"
+        "${project.buildDir}/generated-test-avro-java",
+        "src/test/avro/*.avsc"
     ]
 }
 
 // Make test depend on Avro processing
 compileTestKotlin.dependsOn generateTestAvroJava
 compileTestKotlin.dependsOn processAvroClasses
+
+//// Make Kotlin test depend on Avro generation and processing
+//tasks.withType(compileTestKotlin).configureEach {
+//    dependsOn generateTestAvroJava
+//    dependsOn processAvroClasses
+//}
 
 // Configure test source set to include generated Avro classes
 sourceSets {
@@ -100,48 +84,5 @@ sourceSets {
         java {
             srcDirs += ["${project.buildDir}/generated-test-avro-java"]
         }
-    }
-}
-
-// Configure resource processing to handle duplicates
-tasks.withType(Copy).configureEach {
-    duplicatesStrategy = DuplicatesStrategy.INCLUDE
-}
-
-// Publishing configuration
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
-            groupId = project.group
-            artifactId = 'avro-annotations'
-            version = project.version
-        }
-    }
-    repositories {
-        maven {
-            name = 'localPluginRepository'
-            url = "${buildDir}/repo"
-        }
-    }
-}
-
-// Make sure the plugin metadata is included in the publication
-tasks.named('processResources') {
-    from('src/main/resources') {
-        include 'META-INF/gradle-plugins/*.properties'
-    }
-}
-
-// Ensure all dependencies are included in the plugin jar
-tasks.named('jar') {
-    from {
-        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-    }
-    duplicatesStrategy = DuplicatesStrategy.INCLUDE
-    manifest {
-        attributes(
-            'Main-Class': 'org.example.AvroClassProcessor'
-        )
     }
 }
