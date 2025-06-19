@@ -2,6 +2,7 @@ package org.example;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.*;
 import com.github.javaparser.ast.expr.AnnotationExpr;
@@ -20,6 +21,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 public class AvroClassProcessor {
     private static final String NOT_NULL_ANNOTATION = "org.jetbrains.annotations.NotNull";
@@ -36,14 +38,19 @@ public class AvroClassProcessor {
      * Additionally, it marks public constructors as deprecated and updates their Javadoc.
      *
      * @param javaFile The Java file to process.
-     * @param avroSchema The Avro schema used to determine field nullability.
      * @throws IOException If an I/O error occurs while reading or writing the file.
      */
-    public static void processGeneratedClass(File javaFile, Schema avroSchema) throws IOException {
-        System.out.println(javaFile.getName());
+    public static void processGeneratedClass(File javaFile) throws IOException {
+        System.out.println("processing file: " + javaFile.getName());
         try (FileInputStream in = new FileInputStream(javaFile)) {
             JavaParser javaParser = new JavaParser();
             CompilationUnit cu = javaParser.parse(in).getResult().orElseThrow(() -> new RuntimeException("Failed to parse Java file"));
+
+            if (cu.getTypes().get(0).isEnumDeclaration()) {
+                // Ignore enums, nothing to annotate there.
+                return;
+            }
+
             cu.addImport(NOT_NULL_ANNOTATION);
             cu.addImport(NULLABLE_ANNOTATION);
             cu.addImport(DEPRECATED_ANNOTATION);
@@ -56,20 +63,11 @@ public class AvroClassProcessor {
                         newJavadoc.addBlockTag(new JavadocBlockTag("deprecated", "Do not use this constructor, use .newBuilder() instead"));
                         constructor.setJavadocComment(newJavadoc);
                     });
-            String packageName = cu.getPackageDeclaration().map(pd -> pd.getNameAsString()).get();
-            System.out.println(packageName);
 
-            String className = cu.findFirst(ClassOrInterfaceDeclaration.class).map(c -> c.getNameAsString()).get();
-            System.out.println(className);
-
-            String fullClassName = packageName + "." + className;
-            Class<?> aClass = Class.forName(fullClassName);
-            System.out.println(aClass.getDeclaredField("SCHEMA$").get(null));
+            Schema avroSchema = extractSchema(cu);
 
             List<FieldDeclaration> fields = cu.findAll(FieldDeclaration.class);
-            System.out.println("AAAAA");
             for (FieldDeclaration field : fields) {
-                System.out.println(field);
                 String fieldName = field.getVariable(0).getNameAsString();
                 Schema.Field avroField = avroSchema.getField(fieldName);
                 if (avroField != null) {
@@ -78,7 +76,6 @@ public class AvroClassProcessor {
                     // Annotate getter method only if the field is not part of an inner class
                     if (!(field.getParentNode().isPresent() && field.getParentNode().get().getParentNode().isPresent() && field.getParentNode().get().getParentNode().get().getClass().getSimpleName().equals("ClassOrInterfaceDeclaration"))) {
                         String getterName = "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
-                        System.out.println(getterName);
                         cu.findAll(MethodDeclaration.class).stream()
                             .filter(m -> m.getNameAsString().equals(getterName) && m.getParameters().isEmpty())
                             .forEach(m -> addNullabilityAnnotationToMethod(m, isNullable));
@@ -116,14 +113,28 @@ public class AvroClassProcessor {
             try (FileWriter writer = new FileWriter(javaFile)) {
                 writer.write(cu.toString());
             }
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        } catch (NoSuchFieldException e) {
-            throw new RuntimeException(e);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
         }
     }
+
+    private static Schema extractSchema(CompilationUnit cu) {
+        String fieldValue = extractStaticFieldValue(cu, "SCHEMA$").get();
+        String schemaStructure = fieldValue.substring(fieldValue.lastIndexOf('(') + 2, fieldValue.lastIndexOf(')') - 1);
+        String usableSchemaString = schemaStructure.replace("\\", "");
+        return new org.apache.avro.Schema.Parser().parse(usableSchemaString);
+    }
+
+    public static Optional<String> extractStaticFieldValue(CompilationUnit cu, String fieldName) {
+        return cu.findAll(FieldDeclaration.class).stream()
+                .filter(field -> field.isStatic()) // Only static fields
+                .flatMap(field -> field.getVariables().stream())
+                .filter(var -> var.getNameAsString().equals(fieldName))
+                .map(VariableDeclarator::getInitializer)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .map(Node::toString)
+                .findFirst();
+    }
+
 
     private static boolean isNullable(Schema schema) {
         if (schema.getType() == Schema.Type.UNION) {
@@ -164,13 +175,11 @@ public class AvroClassProcessor {
             System.exit(1);
         }
         String generatedClassesDir = args[0];
-        String schemaPath = args[1];
-        Schema schema = new Schema.Parser().parse(new File(schemaPath));
         Files.walk(Paths.get(generatedClassesDir))
                 .filter(path -> path.toString().endsWith(".java"))
                 .forEach(path -> {
                     try {
-                        processGeneratedClass(path.toFile(), schema);
+                        processGeneratedClass(path.toFile());
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
