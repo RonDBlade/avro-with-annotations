@@ -60,10 +60,7 @@ task processAvroClasses(type: JavaExec) {
     mainClass = 'org.example.AvroClassProcessor'
     classpath = sourceSets.main.runtimeClasspath
     args = [
-        "${project.buildDir}/generated-test-avro-java",
-        "src/test/avro/Person.avsc",
-        "src/test/avro/PersonAndStatus.avsc",
-        "src/test/avro/Status.avsc"
+        "${project.buildDir}/generated-test-avro-java"
     ]
 }
 
