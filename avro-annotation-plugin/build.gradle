@@ -1,0 +1,42 @@
+plugins {
+    id 'java'
+    id 'java-gradle-plugin'
+    id 'maven-publish'
+}
+
+group = 'org.example'
+version = '1.0.0'
+
+repositories {
+    mavenCentral()
+    gradlePluginPortal()
+}
+
+dependencies {
+    implementation 'com.github.javaparser:javaparser-core:3.25.4'
+    implementation 'org.apache.avro:avro:1.11.1'
+
+    // This is required to make the Avro plugin's classes available
+    // to your plugin when it is applied in another project.
+    implementation 'com.github.davidmc24.gradle.plugin.avro:com.github.davidmc24.gradle.plugin.avro.gradle.plugin:1.9.1'
+}
+
+gradlePlugin {
+    plugins {
+        avroAnnotationPlugin {
+            id = 'org.example.avro-annotation-plugin'
+            implementationClass = 'org.example.AvroAnnotationPlugin'
+        }
+    }
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+    repositories {
+        mavenLocal()
+    }
+} 
