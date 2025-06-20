@@ -1,5 +1,6 @@
 package org.example;
 
+import com.github.javaparser.HasParentNode;
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
@@ -20,7 +21,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 public class AvroClassProcessor {
@@ -69,31 +69,64 @@ public class AvroClassProcessor {
             List<FieldDeclaration> fields = cu.findAll(FieldDeclaration.class);
             for (FieldDeclaration field : fields) {
                 String fieldName = field.getVariable(0).getNameAsString();
-                Schema.Field avroField = avroSchema.getField(fieldName);
-                if (avroField != null) {
-                    boolean isNullable = isNullable(avroField.schema());
-                    addNullabilityAnnotation(field, isNullable);
-                    // Annotate getter method only if the field is not part of an inner class
-                    if (!(field.getParentNode().isPresent() && field.getParentNode().get().getParentNode().isPresent() && field.getParentNode().get().getParentNode().get().getClass().getSimpleName().equals("ClassOrInterfaceDeclaration"))) {
+                boolean isTopLevelField = isTopLevel(field);
+
+                if (isTopLevelField) {
+                    Schema.Field avroField = avroSchema.getField(fieldName);
+                    if (avroField != null) {
+                        // Only working for top level fields that are written in the schema file
+                        boolean isNullable = isNullableAccordingToSchema(avroField.schema());
+                        addNullabilityAnnotation(field, isNullable);
+
                         String getterName = "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
                         cu.findAll(MethodDeclaration.class).stream()
-                            .filter(m -> m.getNameAsString().equals(getterName) && m.getParameters().isEmpty())
-                            .forEach(m -> addNullabilityAnnotationToMethod(m, isNullable));
+                                .filter(m -> m.getNameAsString().equals(getterName) && m.getParameters().isEmpty())
+                                .filter(AvroClassProcessor::isTopLevel)
+                                .forEach(m -> addNullabilityAnnotationToMethod(m, isNullable));
+
                         String clearerName = "clear" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
                         cu.findAll(MethodDeclaration.class).stream()
                                 .filter(m -> m.getNameAsString().equals(clearerName) && m.getParameters().isEmpty())
+                                .filter(AvroClassProcessor::isTopLevel)
                                 .forEach(m -> addNullabilityAnnotationToMethod(m, false));
+
                         // Annotate Builder setter method parameter
                         String setterName = "set" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
                         cu.findAll(MethodDeclaration.class).stream()
+                                .filter(m -> m.getNameAsString().equals(setterName) && m.getParameters().size() == 1)
+                                .filter(AvroClassProcessor::isTopLevel)
+                                .forEach(m -> {
+                                    Parameter param = m.getParameter(0);
+                                    addNullabilityAnnotationToParameter(param, isNullable);
+                                });
+                    }
+                } else {
+                    boolean isNullable = !field.getCommonType().isPrimitiveType();
+                    addNullabilityAnnotation(field, isNullable);
+
+                    String getterName = "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
+                    cu.findAll(MethodDeclaration.class).stream()
+                            .filter(m -> m.getNameAsString().equals(getterName) && m.getParameters().isEmpty())
+                            .filter(m1 -> !isTopLevel(m1))
+                            .forEach(m -> addNullabilityAnnotationToMethod(m, isNullable));
+
+                    String clearerName = "clear" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
+                    cu.findAll(MethodDeclaration.class).stream()
+                            .filter(m -> m.getNameAsString().equals(clearerName) && m.getParameters().isEmpty())
+                            .filter(m1 -> !isTopLevel(m1))
+                            .forEach(m -> addNullabilityAnnotationToMethod(m, isNullable));
+
+                    // Annotate Builder setter method parameter
+                    String setterName = "set" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
+                    cu.findAll(MethodDeclaration.class).stream()
                             .filter(m -> m.getNameAsString().equals(setterName) && m.getParameters().size() == 1)
+                            .filter(m1 -> !isTopLevel(m1))
                             .forEach(m -> {
                                 Parameter param = m.getParameter(0);
                                 addNullabilityAnnotationToParameter(param, isNullable);
-                                // Annotate the setter method itself with @NotNull
+                                // Annotate the builders setter method itself with @NotNull
                                 addNullabilityAnnotationToMethod(m, false);
                             });
-                    }
                 }
             }
 
@@ -116,6 +149,11 @@ public class AvroClassProcessor {
         }
     }
 
+    private static boolean isTopLevel(HasParentNode<?> m) {
+        TypeDeclaration<?> typeDeclaration = m.findAncestor(TypeDeclaration.class).get();
+        return !typeDeclaration.isNestedType();
+    }
+
     private static Schema extractSchema(CompilationUnit cu) {
         String fieldValue = extractStaticFieldValue(cu, "SCHEMA$").get();
         String schemaStructure = fieldValue.substring(fieldValue.lastIndexOf('(') + 2, fieldValue.lastIndexOf(')') - 1);
@@ -136,7 +174,7 @@ public class AvroClassProcessor {
     }
 
 
-    private static boolean isNullable(Schema schema) {
+    private static boolean isNullableAccordingToSchema(Schema schema) {
         if (schema.getType() == Schema.Type.UNION) {
             return schema.getTypes().stream().anyMatch(type -> type.getType() == Schema.Type.NULL);
         }

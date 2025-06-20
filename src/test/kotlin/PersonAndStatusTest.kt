@@ -12,13 +12,12 @@ class PersonAndStatusTest {
         // Create a person with required fields
         Status.INACTIVE;
         val v = PersonAndStatus.newBuilder()
-            .setStatus(Status.ACTIVE);
 
         val k = v.person;
         val d = v.personBuilder
         val r = v.nullablePerson
         val e = v.nullablePersonBuilder
-        println(k)
+        val a = v.status;
         println(d.toString())
 
         // Conclusion:
