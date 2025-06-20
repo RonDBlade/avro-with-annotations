@@ -1,31 +1,25 @@
 import com.example.Person
 import com.example.PersonAndStatus
 import com.example.Status
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
 class PersonAndStatusTest {
 
     @Test
     fun testPersonNullability() {
-        // Create a person with required fields
-        Status.INACTIVE;
-        val v = PersonAndStatus.newBuilder()
+        val personAndStatus = PersonAndStatus.newBuilder()
+            .setPerson(Person.newBuilder().setId("!").setIncome(5).build())
+            .setStatus(Status.ACTIVE)
+            .build()
 
-        val k = v.person;
-        val d = v.personBuilder
-        val r = v.nullablePerson
-        val e = v.nullablePersonBuilder
-        val a = v.status;
-        println(d.toString())
+        val personUpdate = Person.newBuilder().setId("hai").setAge(5).setIncome(10).build()
+        personAndStatus.person = Person.newBuilder(personUpdate).build()
+        personAndStatus.nullableStatus = Status.INACTIVE
 
-        // Conclusion:
-        // Within the builder:
-        // - All fields of objects (I.E, not primitives) themselves are nullable (if they were not set, then they are null)
-        // - All fields of primitives nullability is the same as the way its defined in the schema file.
-        // - The getters of the field of the builder should all be nullable
-        // - The input of the setters of the field of the builder should all be nullable
-        // - The output of the setters and clear-ers should be non-nullable.
+        assertEquals(personUpdate, personAndStatus.person)
+        assertEquals(Status.ACTIVE, personAndStatus.status)
+        assertNull(personAndStatus.nullablePerson)
+        assertEquals(Status.INACTIVE, personAndStatus.nullableStatus)
     }
 }

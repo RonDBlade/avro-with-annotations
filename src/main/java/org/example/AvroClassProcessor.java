@@ -72,6 +72,7 @@ public class AvroClassProcessor {
                 boolean isTopLevelField = isTopLevel(field);
 
                 if (isTopLevelField) {
+                    // Working on the actual schema class fields
                     Schema.Field avroField = avroSchema.getField(fieldName);
                     if (avroField != null) {
                         // Only working for top level fields that are written in the schema file
@@ -84,12 +85,6 @@ public class AvroClassProcessor {
                                 .filter(AvroClassProcessor::isTopLevel)
                                 .forEach(m -> addNullabilityAnnotationToMethod(m, isNullable));
 
-                        String clearerName = "clear" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
-                        cu.findAll(MethodDeclaration.class).stream()
-                                .filter(m -> m.getNameAsString().equals(clearerName) && m.getParameters().isEmpty())
-                                .filter(AvroClassProcessor::isTopLevel)
-                                .forEach(m -> addNullabilityAnnotationToMethod(m, false));
-
                         // Annotate Builder setter method parameter
                         String setterName = "set" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
                         cu.findAll(MethodDeclaration.class).stream()
@@ -101,26 +96,27 @@ public class AvroClassProcessor {
                                 });
                     }
                 } else {
+                    // Working on the builder fields
                     boolean isNullable = !field.getCommonType().isPrimitiveType();
                     addNullabilityAnnotation(field, isNullable);
 
                     String getterName = "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
                     cu.findAll(MethodDeclaration.class).stream()
                             .filter(m -> m.getNameAsString().equals(getterName) && m.getParameters().isEmpty())
-                            .filter(m1 -> !isTopLevel(m1))
+                            .filter(m -> !isTopLevel(m))
                             .forEach(m -> addNullabilityAnnotationToMethod(m, isNullable));
 
                     String clearerName = "clear" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
                     cu.findAll(MethodDeclaration.class).stream()
                             .filter(m -> m.getNameAsString().equals(clearerName) && m.getParameters().isEmpty())
-                            .filter(m1 -> !isTopLevel(m1))
-                            .forEach(m -> addNullabilityAnnotationToMethod(m, isNullable));
+                            .filter(m -> !isTopLevel(m))
+                            .forEach(m -> addNullabilityAnnotationToMethod(m, false));
 
                     // Annotate Builder setter method parameter
                     String setterName = "set" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
                     cu.findAll(MethodDeclaration.class).stream()
                             .filter(m -> m.getNameAsString().equals(setterName) && m.getParameters().size() == 1)
-                            .filter(m1 -> !isTopLevel(m1))
+                            .filter(m -> !isTopLevel(m))
                             .forEach(m -> {
                                 Parameter param = m.getParameter(0);
                                 addNullabilityAnnotationToParameter(param, isNullable);
