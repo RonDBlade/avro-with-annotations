@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 public class AvroClassProcessor {
@@ -101,27 +102,9 @@ public class AvroClassProcessor {
                                     .map(p -> p.getType().asClassOrInterfaceType().getTypeArguments().get())
                                     .findFirst().get();
 
-                            if (avroField.schema().getType().equals(Schema.Type.ARRAY)) {
-                                // List
-                                boolean isNullableItem = isNullable(avroField.schema().getElementType());
-
-                                // Annotate Elements
-                                addNullabilityToTemplateType(fieldTypeTemplates.get(0), isNullableItem);
-                                addNullabilityToTemplateType(getterReturnTypeTemplates.get(0), isNullableItem);
-                                addNullabilityToTemplateType(setterParameterTypeTemplates.get(0), isNullableItem);
-                            } else {
-                                // Map
-                                boolean isNullableValue = isNullable(avroField.schema().getValueType());
-
-                                // Annotate Keys
-                                addNullabilityToTemplateType(fieldTypeTemplates.get(0), false);
-                                addNullabilityToTemplateType(getterReturnTypeTemplates.get(0), false);
-                                addNullabilityToTemplateType(setterParameterTypeTemplates.get(0), false);
-                                // Annotate Values
-                                addNullabilityToTemplateType(fieldTypeTemplates.get(1), isNullableValue);
-                                addNullabilityToTemplateType(getterReturnTypeTemplates.get(1), isNullableValue);
-                                addNullabilityToTemplateType(setterParameterTypeTemplates.get(1), isNullableValue);
-                            }
+                            addAnnotationsToTemplatesInRecursion(avroField.schema(), fieldTypeTemplates);
+                            addAnnotationsToTemplatesInRecursion(avroField.schema(), getterReturnTypeTemplates);
+                            addAnnotationsToTemplatesInRecursion(avroField.schema(), setterParameterTypeTemplates);
                         }
                     }
                 }
@@ -142,6 +125,26 @@ public class AvroClassProcessor {
 
             try (FileWriter writer = new FileWriter(javaFile)) {
                 writer.write(cu.toString());
+            }
+        }
+    }
+
+    private static void addAnnotationsToTemplatesInRecursion(Schema avroSchema, NodeList<Type> typesOfTemplates) {
+        switch (avroSchema.getType()) {
+            case ARRAY -> {
+                boolean isNullableItem = isNullable(avroSchema.getElementType());
+                addNullabilityToTemplateType(typesOfTemplates.get(0), isNullableItem);
+
+                typesOfTemplates.get(0).asClassOrInterfaceType().getTypeArguments()
+                        .ifPresent(itemType -> addAnnotationsToTemplatesInRecursion(avroSchema.getElementType(), itemType));
+            }
+            case MAP -> {
+                boolean isNullableValue = isNullable(avroSchema.getValueType());
+                addNullabilityToTemplateType(typesOfTemplates.get(0), false);
+                addNullabilityToTemplateType(typesOfTemplates.get(1), isNullableValue);
+
+                typesOfTemplates.get(1).asClassOrInterfaceType().getTypeArguments()
+                        .ifPresent(valueType -> addAnnotationsToTemplatesInRecursion(avroSchema.getValueType(), valueType));
             }
         }
     }
