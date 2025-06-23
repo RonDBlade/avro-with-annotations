@@ -93,7 +93,6 @@ public class AvroClassProcessor {
                             NodeList<Type> fieldTypeTemplates = field.getCommonType().asClassOrInterfaceType().getTypeArguments().get();
                             NodeList<Type> getterReturnTypeTemplates = cu.findAll(MethodDeclaration.class).stream()
                                     .filter(m -> m.getNameAsString().equals(getterName) && m.getParameters().isEmpty())
-                                    .peek(m -> System.out.println(m.getType()))
                                     .map(m -> m.getType().asClassOrInterfaceType().getTypeArguments().get())
                                     .findFirst().get();
                             NodeList<Type> setterParameterTypeTemplates = cu.findAll(MethodDeclaration.class).stream()

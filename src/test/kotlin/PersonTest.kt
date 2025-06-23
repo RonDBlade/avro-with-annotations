@@ -16,10 +16,10 @@ class PersonTest {
         // Required field should be non-null
         assertEquals("123", person.id)
 
-        val k: List<Int?> = person.listWithNullableValues
-        val s: List<Int> = person.listWithValues
-        val w: Map<String, Int> = person.mapWithValues
-        val r: Map<String, Int?> = person.mapWithNullableValues
+        val lnn: List<Int> = person.listWithValues
+        val ln: List<Int?> = person.listWithNullableValues
+        val mnn: Map<String, Int> = person.mapWithValues
+        val mn: Map<String, Int?> = person.mapWithNullableValues
 
         // Optional field should be nullable
         person.age = null
