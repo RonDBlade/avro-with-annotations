@@ -11,6 +11,20 @@
       "name": "age",
       "type": ["null", "int"],
       "default": null
+    },
+    {
+      "name": "listWithValues",
+      "type": {
+        "type": "array",
+        "items": "int"
+      }
+    },
+    {
+      "name": "listWithNullableValues",
+      "type": {
+        "type": "array",
+        "items": ["null", "int"]
+      }
     }
   ]
 } 

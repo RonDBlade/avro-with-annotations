@@ -10,6 +10,7 @@ import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.MarkerAnnotationExpr;
 import com.github.javaparser.ast.nodeTypes.modifiers.NodeWithPublicModifier;
+import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.javadoc.Javadoc;
 import com.github.javaparser.javadoc.JavadocBlockTag;
 import com.github.javaparser.javadoc.description.JavadocDescription;
@@ -85,6 +86,46 @@ public class AvroClassProcessor {
                                 // Annotate the setter method itself with @NotNull
                                 addNullabilityAnnotationToMethod(m, false);
                             });
+
+                        boolean isList = field.getCommonType().asClassOrInterfaceType().getNameAsString().equals("List");
+                        System.out.println("field name: " + fieldName + ", type is " + isList);
+                        if (isList) {
+                            // Field
+                            NodeList<Type> templateTypes = field.getCommonType().asClassOrInterfaceType().getTypeArguments().get();
+                            System.out.println("List element type is: " + templateTypes);
+                            Type templateType = templateTypes.get(0);
+                            System.out.println("type original annotations are:" + templateType.getAnnotations());
+                            var k = templateType.setAnnotations(NodeList.nodeList(new MarkerAnnotationExpr(NULLABLE_ANNOTATION)));
+                            System.out.println("AAAAAA: " + templateType);
+                            System.out.println("BBBBBB: " + k);
+                            System.out.println("CCCCC:" + field.getCommonType());
+
+                            // Getter
+                            cu.findAll(MethodDeclaration.class).stream()
+                                    .filter(m -> m.getNameAsString().equals(getterName) && m.getParameters().isEmpty())
+                                    .peek(m -> System.out.println(m.getType()))
+                                    .map(m -> m.getType().asClassOrInterfaceType().getTypeArguments().get().get(0))
+                                    .map(type -> type.setAnnotations(NodeList.nodeList(new MarkerAnnotationExpr(NULLABLE_ANNOTATION))))
+                                    .peek(types -> System.out.println(types))
+                                    .forEach(m -> System.out.println("YAY"));
+
+                            // Setter
+                            cu.findAll(MethodDeclaration.class).stream()
+                                    .filter(m -> m.getNameAsString().equals(setterName) && m.getParameters().size() == 1)
+                                    .map(m -> m.getParameter(0))
+                                    .map(p -> p.getType().asClassOrInterfaceType().getTypeArguments().get().get(0))
+                                    .map(type -> type.setAnnotations(NodeList.nodeList(new MarkerAnnotationExpr(NULLABLE_ANNOTATION))))
+                                    .peek(type -> System.out.println(type))
+                                    .forEach(m -> {
+                                        System.out.println("aaaaa");
+                                    });
+                        }
+
+                        boolean isMap = field.getCommonType().asClassOrInterfaceType().getNameAsString().equals("Map");
+                        System.out.println("field name: " + fieldName + ", type is " + isMap);
+                        if (isMap) {
+
+                        }
                     }
                 }
             }
