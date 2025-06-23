@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Set;
 
 public class AvroClassProcessor {
     private static final String NOT_NULL_ANNOTATION = "org.jetbrains.annotations.NotNull";
@@ -87,12 +88,7 @@ public class AvroClassProcessor {
                                 addNullabilityAnnotationToMethod(m, false);
                             });
 
-                        boolean isList = avroField.schema().getType().equals(Schema.Type.ARRAY);
-                        System.out.println("field name: " + fieldName + ", type is " + isList);
-                        if (isList) {
-                            // Nullability
-
-                            boolean isNullableItem = isNullable(avroField.schema().getElementType());
+                        if (isTemplatedType(avroField)) {
                             // Templates
                             NodeList<Type> fieldTypeTemplates = field.getCommonType().asClassOrInterfaceType().getTypeArguments().get();
                             NodeList<Type> getterReturnTypeTemplates = cu.findAll(MethodDeclaration.class).stream()
@@ -106,39 +102,27 @@ public class AvroClassProcessor {
                                     .map(p -> p.getType().asClassOrInterfaceType().getTypeArguments().get())
                                     .findFirst().get();
 
-                            // Items
-                            addNullabilityToTemplateType(fieldTypeTemplates.get(0), isNullableItem);
-                            addNullabilityToTemplateType(getterReturnTypeTemplates.get(0), isNullableItem);
-                            addNullabilityToTemplateType(setterParameterTypeTemplates.get(0), isNullableItem);
-                        }
+                            if (avroField.schema().getType().equals(Schema.Type.ARRAY)) {
+                                // List
+                                boolean isNullableItem = isNullable(avroField.schema().getElementType());
 
-                        boolean isMap = avroField.schema().getType().equals(Schema.Type.MAP);;
-                        System.out.println("field name: " + fieldName + ", type is " + isMap);
-                        if (isMap) {
-                            // Nullability
-                            boolean isNullableValue = isNullable(avroField.schema().getValueType());
+                                // Annotate Elements
+                                addNullabilityToTemplateType(fieldTypeTemplates.get(0), isNullableItem);
+                                addNullabilityToTemplateType(getterReturnTypeTemplates.get(0), isNullableItem);
+                                addNullabilityToTemplateType(setterParameterTypeTemplates.get(0), isNullableItem);
+                            } else {
+                                // Map
+                                boolean isNullableValue = isNullable(avroField.schema().getValueType());
 
-                            // Templates
-                            NodeList<Type> fieldTypeTemplates = field.getCommonType().asClassOrInterfaceType().getTypeArguments().get();
-                            NodeList<Type> getterReturnTypeTemplates = cu.findAll(MethodDeclaration.class).stream()
-                                    .filter(m -> m.getNameAsString().equals(getterName) && m.getParameters().isEmpty())
-                                    .peek(m -> System.out.println(m.getType()))
-                                    .map(m -> m.getType().asClassOrInterfaceType().getTypeArguments().get())
-                                    .findFirst().get();
-                            NodeList<Type> setterParameterTypeTemplates = cu.findAll(MethodDeclaration.class).stream()
-                                    .filter(m -> m.getNameAsString().equals(setterName) && m.getParameters().size() == 1)
-                                    .map(m -> m.getParameter(0))
-                                    .map(p -> p.getType().asClassOrInterfaceType().getTypeArguments().get())
-                                    .findFirst().get();
-
-                            // Key
-                            addNullabilityToTemplateType(fieldTypeTemplates.get(0), false);
-                            addNullabilityToTemplateType(getterReturnTypeTemplates.get(0), false);
-                            addNullabilityToTemplateType(setterParameterTypeTemplates.get(0), false);
-                            // Value
-                            addNullabilityToTemplateType(fieldTypeTemplates.get(1), isNullableValue);
-                            addNullabilityToTemplateType(getterReturnTypeTemplates.get(1), isNullableValue);
-                            addNullabilityToTemplateType(setterParameterTypeTemplates.get(1), isNullableValue);
+                                // Annotate Keys
+                                addNullabilityToTemplateType(fieldTypeTemplates.get(0), false);
+                                addNullabilityToTemplateType(getterReturnTypeTemplates.get(0), false);
+                                addNullabilityToTemplateType(setterParameterTypeTemplates.get(0), false);
+                                // Annotate Values
+                                addNullabilityToTemplateType(fieldTypeTemplates.get(1), isNullableValue);
+                                addNullabilityToTemplateType(getterReturnTypeTemplates.get(1), isNullableValue);
+                                addNullabilityToTemplateType(setterParameterTypeTemplates.get(1), isNullableValue);
+                            }
                         }
                     }
                 }
@@ -161,6 +145,11 @@ public class AvroClassProcessor {
                 writer.write(cu.toString());
             }
         }
+    }
+
+    private static boolean isTemplatedType(Schema.Field avroField) {
+        Set<Schema.Type> templatedAvroTypes = Set.of(Schema.Type.ARRAY, Schema.Type.MAP);
+        return templatedAvroTypes.contains(avroField.schema().getType());
     }
 
     private static boolean isNullable(Schema schema) {

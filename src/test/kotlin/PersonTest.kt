@@ -7,8 +7,12 @@ class PersonTest {
     fun testPersonNullability() {
         // Create a person with required fields
         val person = Person.newBuilder().setId("123")
+            .setAge(2)
             .setListWithValues(listOf(1))
-            .setMapWithValues(mapOf("a" to 1)).build()
+            .setListWithNullableValues(listOf(2, null))
+            .setMapWithValues(mapOf("a" to 1))
+            .setMapWithNullableValues(mapOf("a" to 1, "b" to null))
+            .build()
         // Required field should be non-null
         assertEquals("123", person.id)
 
