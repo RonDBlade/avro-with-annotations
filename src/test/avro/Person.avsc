@@ -25,6 +25,20 @@
         "type": "array",
         "items": ["null", "int"]
       }
+    },
+    {
+      "name": "mapWithValues",
+      "type": {
+        "type": "map",
+        "values": "int"
+      }
+    },
+    {
+      "name": "mapWithNullableValues",
+      "type": {
+        "type": "map",
+        "values": ["null", "int"]
+      }
     }
   ]
 } 

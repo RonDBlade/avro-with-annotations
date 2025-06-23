@@ -87,44 +87,58 @@ public class AvroClassProcessor {
                                 addNullabilityAnnotationToMethod(m, false);
                             });
 
-                        boolean isList = field.getCommonType().asClassOrInterfaceType().getNameAsString().equals("List");
+                        boolean isList = avroField.schema().getType().equals(Schema.Type.ARRAY);
                         System.out.println("field name: " + fieldName + ", type is " + isList);
                         if (isList) {
-                            // Field
-                            NodeList<Type> templateTypes = field.getCommonType().asClassOrInterfaceType().getTypeArguments().get();
-                            System.out.println("List element type is: " + templateTypes);
-                            Type templateType = templateTypes.get(0);
-                            System.out.println("type original annotations are:" + templateType.getAnnotations());
-                            var k = templateType.setAnnotations(NodeList.nodeList(new MarkerAnnotationExpr(NULLABLE_ANNOTATION)));
-                            System.out.println("AAAAAA: " + templateType);
-                            System.out.println("BBBBBB: " + k);
-                            System.out.println("CCCCC:" + field.getCommonType());
+                            // Nullability
 
-                            // Getter
-                            cu.findAll(MethodDeclaration.class).stream()
+                            boolean isNullableItem = isNullable(avroField.schema().getElementType());
+                            // Templates
+                            NodeList<Type> fieldTypeTemplates = field.getCommonType().asClassOrInterfaceType().getTypeArguments().get();
+                            NodeList<Type> getterReturnTypeTemplates = cu.findAll(MethodDeclaration.class).stream()
                                     .filter(m -> m.getNameAsString().equals(getterName) && m.getParameters().isEmpty())
                                     .peek(m -> System.out.println(m.getType()))
-                                    .map(m -> m.getType().asClassOrInterfaceType().getTypeArguments().get().get(0))
-                                    .map(type -> type.setAnnotations(NodeList.nodeList(new MarkerAnnotationExpr(NULLABLE_ANNOTATION))))
-                                    .peek(types -> System.out.println(types))
-                                    .forEach(m -> System.out.println("YAY"));
-
-                            // Setter
-                            cu.findAll(MethodDeclaration.class).stream()
+                                    .map(m -> m.getType().asClassOrInterfaceType().getTypeArguments().get())
+                                    .findFirst().get();
+                            NodeList<Type> setterParameterTypeTemplates = cu.findAll(MethodDeclaration.class).stream()
                                     .filter(m -> m.getNameAsString().equals(setterName) && m.getParameters().size() == 1)
                                     .map(m -> m.getParameter(0))
-                                    .map(p -> p.getType().asClassOrInterfaceType().getTypeArguments().get().get(0))
-                                    .map(type -> type.setAnnotations(NodeList.nodeList(new MarkerAnnotationExpr(NULLABLE_ANNOTATION))))
-                                    .peek(type -> System.out.println(type))
-                                    .forEach(m -> {
-                                        System.out.println("aaaaa");
-                                    });
+                                    .map(p -> p.getType().asClassOrInterfaceType().getTypeArguments().get())
+                                    .findFirst().get();
+
+                            // Items
+                            addNullabilityToTemplateType(fieldTypeTemplates.get(0), isNullableItem);
+                            addNullabilityToTemplateType(getterReturnTypeTemplates.get(0), isNullableItem);
+                            addNullabilityToTemplateType(setterParameterTypeTemplates.get(0), isNullableItem);
                         }
 
-                        boolean isMap = field.getCommonType().asClassOrInterfaceType().getNameAsString().equals("Map");
+                        boolean isMap = avroField.schema().getType().equals(Schema.Type.MAP);;
                         System.out.println("field name: " + fieldName + ", type is " + isMap);
                         if (isMap) {
+                            // Nullability
+                            boolean isNullableValue = isNullable(avroField.schema().getValueType());
 
+                            // Templates
+                            NodeList<Type> fieldTypeTemplates = field.getCommonType().asClassOrInterfaceType().getTypeArguments().get();
+                            NodeList<Type> getterReturnTypeTemplates = cu.findAll(MethodDeclaration.class).stream()
+                                    .filter(m -> m.getNameAsString().equals(getterName) && m.getParameters().isEmpty())
+                                    .peek(m -> System.out.println(m.getType()))
+                                    .map(m -> m.getType().asClassOrInterfaceType().getTypeArguments().get())
+                                    .findFirst().get();
+                            NodeList<Type> setterParameterTypeTemplates = cu.findAll(MethodDeclaration.class).stream()
+                                    .filter(m -> m.getNameAsString().equals(setterName) && m.getParameters().size() == 1)
+                                    .map(m -> m.getParameter(0))
+                                    .map(p -> p.getType().asClassOrInterfaceType().getTypeArguments().get())
+                                    .findFirst().get();
+
+                            // Key
+                            addNullabilityToTemplateType(fieldTypeTemplates.get(0), false);
+                            addNullabilityToTemplateType(getterReturnTypeTemplates.get(0), false);
+                            addNullabilityToTemplateType(setterParameterTypeTemplates.get(0), false);
+                            // Value
+                            addNullabilityToTemplateType(fieldTypeTemplates.get(1), isNullableValue);
+                            addNullabilityToTemplateType(getterReturnTypeTemplates.get(1), isNullableValue);
+                            addNullabilityToTemplateType(setterParameterTypeTemplates.get(1), isNullableValue);
                         }
                     }
                 }
@@ -175,6 +189,13 @@ public class AvroClassProcessor {
         String annotationName = isNullable ? NULLABLE_ANNOTATION : NOT_NULL_ANNOTATION;
         if (!hasAnnotation(parameter.getAnnotations(), annotationName)) {
             parameter.addAnnotation(new MarkerAnnotationExpr(annotationName));
+        }
+    }
+
+    private static void addNullabilityToTemplateType(Type type, boolean isNullable) {
+        String annotationName = isNullable ? NULLABLE_ANNOTATION : NOT_NULL_ANNOTATION;
+        if (!hasAnnotation(type.getAnnotations(), annotationName)) {
+            type.setAnnotations(NodeList.nodeList(new MarkerAnnotationExpr(annotationName)));
         }
     }
 
