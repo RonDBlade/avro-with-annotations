@@ -1,0 +1,31 @@
+plugins {
+    id 'java'
+    id 'org.jetbrains.kotlin.jvm' version '1.9.22'
+    id 'org.example.avro-annotation-plugin' version '1.0.0'
+}
+
+avroAnnotation {
+    inputDir = file("build/generated-main-avro-java") // Read from here
+    outputDir = file("build/generated-main-avro-java") // And write back to here
+    schemaFile = file("src/main/avro/Person.avsc")
+}
+
+group = 'org.example'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    gradlePluginPortal()
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.apache.avro:avro:1.11.4'
+    implementation 'org.jetbrains:annotations:24.1.0'
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib'
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+test {
+    useJUnitPlatform()
+}

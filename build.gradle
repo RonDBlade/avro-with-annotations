@@ -1,7 +1,5 @@
 plugins {
     id 'java'
-    id 'org.jetbrains.kotlin.jvm' version '1.9.22'
-    id 'com.github.davidmc24.gradle.plugin.avro' version '1.9.1'
 }
 
 group = 'org.example'
@@ -11,78 +9,12 @@ repositories {
     mavenCentral()
 }
 
-// Create a new configuration for Avro
-configurations {
-    avroDeps
-    compileOnlyResolvable {
-        canBeResolved = true
-        canBeConsumed = false
-        extendsFrom compileOnly
-    }
-}
-
 dependencies {
-    implementation 'org.apache.avro:avro:1.11.4'
-    implementation 'org.jetbrains.kotlin:kotlin-stdlib'
-    implementation 'org.jetbrains:annotations:24.1.0'
-    implementation 'com.github.javaparser:javaparser-core:3.25.5'
-    compileOnly 'org.jetbrains:annotations:24.1.0'
-    annotationProcessor 'org.jetbrains:annotations:24.1.0'
-    
-    // Add dependencies to the Avro configuration
-    avroDeps 'org.jetbrains:annotations:24.1.0'
-    
+    // Dependencies are now managed by the sub-modules
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
-    testImplementation 'org.apache.avro:avro:1.11.4'
 }
 
 test {
     useJUnitPlatform()
-}
-
-avro {
-    createSetters = true
-    fieldVisibility = "PRIVATE"
-    stringType = "String"
-    enableDecimalLogicalType = true
-}
-
-// Configure the Avro plugin to use our dependencies
-tasks.withType(com.github.davidmc24.gradle.plugin.avro.GenerateAvroJavaTask) {
-    classpath += configurations.avroDeps
-}
-
-// Create a new task for processing Avro classes
-task processAvroClasses(type: JavaExec) {
-    dependsOn compileJava
-    dependsOn generateTestAvroJava
-    mainClass = 'org.example.AvroClassProcessor'
-    classpath = sourceSets.main.runtimeClasspath
-    args = [
-        "${project.buildDir}/generated-test-avro-java",
-        "src/test/avro/*.avsc"
-    ]
-}
-
-// Make test depend on Avro processing
-compileTestKotlin.dependsOn generateTestAvroJava
-compileTestKotlin.dependsOn processAvroClasses
-
-//// Make Kotlin test depend on Avro generation and processing
-//tasks.withType(compileTestKotlin).configureEach {
-//    dependsOn generateTestAvroJava
-//    dependsOn processAvroClasses
-//}
-
-// Configure test source set to include generated Avro classes
-sourceSets {
-    main {
-        compileClasspath += configurations.compileOnlyResolvable
-    }
-    test {
-        java {
-            srcDirs += ["${project.buildDir}/generated-test-avro-java"]
-        }
-    }
 }

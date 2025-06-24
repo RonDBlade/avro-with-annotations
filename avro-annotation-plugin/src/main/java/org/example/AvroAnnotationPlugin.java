@@ -19,5 +19,17 @@ public class AvroAnnotationPlugin implements Plugin<Project> {
             task.setOutputDir(extension.getOutputDir());
             task.setSchemaFile(extension.getSchemaFile());
         });
+
+        project.getTasks().named("generateAvroJava").configure(task -> {
+            task.finalizedBy("annotateAvroClasses");
+        });
+
+        project.getTasks().named("jar").configure(task -> {
+            task.dependsOn("annotateAvroClasses");
+        });
+
+        project.getTasks().named("compileJava").configure(task -> {
+            task.dependsOn("annotateAvroClasses");
+        });
     }
 } 

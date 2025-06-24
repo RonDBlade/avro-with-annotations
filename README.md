@@ -2,8 +2,26 @@
 
 This project provides a **Gradle plugin** for automatically adding annotations to Java classes generated from Avro schema files. The plugin is implemented in Java and can be published locally for use in other projects.
 
-This was created after using the davidmc Gradle plugin didn't allow for comfortable use of the generated objects in Kotlin
+---
 
+## Repository Structure
+
+```
+.
+├── avro-annotation-plugin/      # The Gradle plugin: adds annotations to Avro-generated Java classes
+│   ├── build.gradle
+│   └── src/main/java/org/example/
+│       ├── AvroAnnotationPlugin.java
+│       ├── AnnotateAvroClassesTask.java
+│       └── AvroAnnotationExtension.java
+├── plugin-usage-example/        # Example project using the plugin end-to-end (Java & Kotlin tests)
+│   ├── build.gradle
+│   ├── src/main/avro/           # Avro schema files (e.g., Person.avsc)
+│   ├── src/test/kotlin/         # Kotlin tests for annotated Avro classes
+│   └── ...
+├── build.gradle                 # Root build config (now minimal)
+└── README.md                    # This file
+```
 
 ---
 
@@ -19,31 +37,39 @@ This was created after using the davidmc Gradle plugin didn't allow for comforta
 
 ---
 
-## Benefits
+## Module Overview
 
-### For Kotlin Users
-- The annotations help Kotlin understand which fields can be null and which cannot
-- Enables proper nullability checking when using the generated classes
-- Provides better IDE support and compile-time safety
+### 1. `avro-annotation-plugin/`
+- **Purpose:** Implements the Gradle plugin that post-processes Avro-generated Java sources, adding nullability annotations.
+- **Key files:**
+  - `AvroAnnotationPlugin.java`: Registers the plugin and its Gradle task.
+  - `AnnotateAvroClassesTask.java`: The Gradle task that performs annotation.
+  - `AvroAnnotationExtension.java`: Allows configuration via the Gradle DSL.
+- **Dependencies:** JavaParser, Avro, JetBrains Annotations.
 
-### For Java Users
-- Provides warnings at compile time and IDE level
-- Helps catch potential null pointer issues early
-- Improves code quality and maintainability
+### 2. `plugin-usage-example/`
+- **Purpose:** Demonstrates how to use the plugin in a real project, including Avro schema, plugin configuration, and tests (including Kotlin tests for null-safety).
+- **Key files:**
+  - `build.gradle`: Shows the correct way to configure the plugin for overwriting Avro-generated sources with annotated versions.
+  - `src/main/avro/Person.avsc`: Example Avro schema.
+  - `src/test/kotlin/PersonTest.kt`: Kotlin test verifying nullability annotations.
+- **How it works:**
+  - The Avro plugin generates Java sources from the schema into `build/generated-main-avro-java`.
+  - The annotation plugin overwrites those sources in-place, so only the annotated versions are compiled and packaged.
+  - The project depends on `org.jetbrains:annotations` so the compiler recognizes the annotations.
 
 ---
 
 ## How to Use the Plugin
 
-### 1. For local plugin usage: Publish the Plugin Locally
-
+### 1. Publish the Plugin Locally
 From the project root, run:
 ```sh
 ./gradlew :avro-annotation-plugin:publishToMavenLocal
 ```
 
-### 2. Apply the Plugin in Your Project.
-If importing the plugin from the Gradle Plugin Portal, skip to step 3. Otherwise, in your `settings.gradle`, ensure Gradle looks in your local Maven repository:
+### 2. Apply the Plugin in Your Project
+In your `settings.gradle`, ensure Gradle looks in your local Maven repository:
 ```groovy
 pluginManagement {
     repositories {
@@ -54,27 +80,32 @@ pluginManagement {
 }
 ```
 
-
-### 3. Update your `build.gradle`:
+### 3. Configure the Plugin in Your `build.gradle`
+**Recommended pattern:** Overwrite the Avro-generated sources in-place.
 ```groovy
 plugins {
     id 'org.example.avro-annotation-plugin' version '1.0.0'
 }
 
 avroAnnotation {
-    inputDir = file("src/main/java/generated") // Directory with generated Java classes
-    outputDir = file("build/generated-annotated") // Output directory for annotated classes
-    schemaFile = file("src/main/avro/Person.avsc") // Avro schema file
+    inputDir = file("build/generated-main-avro-java") // Avro plugin output
+    outputDir = file("build/generated-main-avro-java") // Overwrite in-place
+    schemaFile = file("src/main/avro/Person.avsc")
+}
+
+dependencies {
+    implementation 'org.jetbrains:annotations:24.1.0' // Required for annotation recognition
 }
 ```
 
-### 3. Run the Task
-
+### 4. Build Your Project
 ```sh
-./gradlew annotateAvroClasses
+./gradlew build
 ```
-
-This will process all Java files in `inputDir`, annotate them according to the Avro schema, and write the results to `outputDir`.
+This will:
+- Generate Java sources from Avro schemas
+- Annotate them in-place
+- Compile and package only the annotated versions
 
 ---
 
@@ -86,15 +117,8 @@ This will process all Java files in `inputDir`, annotate them according to the A
   "name": "Person",
   "namespace": "com.example",
   "fields": [
-    { 
-      "name": "id",
-     "type": "string" 
-    },
-    { 
-      "name": "age",
-       "type": ["null", "int"],
-        "default": null 
-        }
+    { "name": "id", "type": "string" },
+    { "name": "age", "type": ["null", "int"], "default": null }
   ]
 }
 ```
@@ -103,41 +127,9 @@ This will process all Java files in `inputDir`, annotate them according to the A
 
 ---
 
-## How It Works (Implementation Details)
-
-- The plugin module (`avro-annotation-plugin/`) contains:
-  - `AvroAnnotationPlugin.java`: The plugin entry point, registers the task and extension.
-  - `AnnotateAvroClassesTask.java`: The Gradle task that performs annotation.
-  - `AvroAnnotationExtension.java`: Allows configuration via the Gradle DSL.
-- The task uses **JavaParser** to parse and modify Java source files, adding the appropriate annotations based on the Avro schema (using the Avro library).
-- The plugin is published to your local Maven repository and can be reused in any Gradle project.
-
----
-
-## Project Structure
-
-```
-.
-├── avro-annotation-plugin/
-│   ├── build.gradle
-│   └── src/main/java/org/example/
-│       ├── AvroAnnotationPlugin.java
-│       ├── AnnotateAvroClassesTask.java
-│       └── AvroAnnotationExtension.java
-├── src/
-│   ├── main/
-│   └── test/
-│       ├── avro/               # Avro schema files
-│       │   └── Person.avsc     # Example schema
-│       └── kotlin/             # Kotlin tests
-└── build.gradle                # Build configuration
-```
-
----
-
 ## Testing
 
-- The project includes Kotlin tests that verify the nullability behavior of the generated classes.
+- The `plugin-usage-example` module includes Kotlin tests that verify the nullability behavior of the generated classes.
 - Example: The `id` field is non-nullable and must be set; the `age` field is nullable and can be set to null.
 
 ---
@@ -147,8 +139,8 @@ This will process all Java files in `inputDir`, annotate them according to the A
 - Apache Avro
 - JavaParser
 - JetBrains Annotations
-- Kotlin (for testing it actually works)
 - JUnit 5
+- Kotlin (for testing)
 
 ---
 

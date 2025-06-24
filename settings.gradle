@@ -1,3 +1,10 @@
+pluginManagement {
+    repositories {
+        mavenLocal()
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
 rootProject.name = 'avro-with-annotations'
 include 'avro-annotation-plugin'
-
+include 'plugin-usage-example'
