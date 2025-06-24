@@ -1,8 +1,22 @@
 package org.example;
 
+import org.apache.avro.Schema;
+import org.gradle.api.DefaultTask;
+import org.gradle.api.tasks.InputDirectory;
+import org.gradle.api.tasks.InputFile;
+import org.gradle.api.tasks.OutputDirectory;
+import org.gradle.api.tasks.TaskAction;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
@@ -13,35 +27,50 @@ import com.github.javaparser.ast.nodeTypes.modifiers.NodeWithPublicModifier;
 import com.github.javaparser.javadoc.Javadoc;
 import com.github.javaparser.javadoc.JavadocBlockTag;
 import com.github.javaparser.javadoc.description.JavadocDescription;
-import org.apache.avro.Schema;
+import com.github.javaparser.ast.NodeList;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.List;
+public class AnnotateAvroClassesTask extends DefaultTask {
+    private File inputDir;
+    private File outputDir;
+    private File schemaFile;
 
-public class AvroClassProcessor {
+    @InputDirectory
+    public File getInputDir() { return inputDir; }
+    public void setInputDir(File inputDir) { this.inputDir = inputDir; }
+
+    @OutputDirectory
+    public File getOutputDir() { return outputDir; }
+    public void setOutputDir(File outputDir) { this.outputDir = outputDir; }
+
+    @InputFile
+    public File getSchemaFile() { return schemaFile; }
+    public void setSchemaFile(File schemaFile) { this.schemaFile = schemaFile; }
+
+    @TaskAction
+    public void annotate() throws IOException {
+        if (inputDir == null || outputDir == null || schemaFile == null) {
+            throw new IllegalArgumentException("inputDir, outputDir, and schemaFile must be set");
+        }
+        Schema schema = new Schema.Parser().parse(schemaFile);
+        Files.walk(inputDir.toPath())
+                .filter(path -> path.toString().endsWith(".java"))
+                .forEach(path -> {
+                    try {
+                        processGeneratedClass(path.toFile(), schema, inputDir.toPath(), outputDir.toPath());
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+        getLogger().lifecycle("Annotated Avro classes in {} using schema {}", inputDir, schemaFile);
+    }
+
     private static final String NOT_NULL_ANNOTATION = "org.jetbrains.annotations.NotNull";
     private static final String NULLABLE_ANNOTATION = "org.jetbrains.annotations.Nullable";
     private static final String DEPRECATED_ANNOTATION = "java.lang.Deprecated";
     private static final String BUILD_METHOD_NAME = "build";
     private static final String NEW_BUILD_METHOD_NAME = "newBuilder";
 
-
-    /**
-     * Processes a generated Java class file to add nullability annotations to fields, getter methods, and setter methods.
-     * This method reads the Java file, parses it using JavaParser, and then adds appropriate annotations based on the Avro schema.
-     * It annotates fields and their corresponding getter and setter methods with @NotNull or @Nullable based on the field's nullability in the Avro schema.
-     * Additionally, it marks public constructors as deprecated and updates their Javadoc.
-     *
-     * @param javaFile The Java file to process.
-     * @param avroSchema The Avro schema used to determine field nullability.
-     * @throws IOException If an I/O error occurs while reading or writing the file.
-     */
-    public static void processGeneratedClass(File javaFile, Schema avroSchema) throws IOException {
+    private static void processGeneratedClass(File javaFile, Schema avroSchema, Path inputRoot, Path outputRoot) throws IOException {
         try (FileInputStream in = new FileInputStream(javaFile)) {
             JavaParser javaParser = new JavaParser();
             CompilationUnit cu = javaParser.parse(in).getResult().orElseThrow(() -> new RuntimeException("Failed to parse Java file"));
@@ -65,7 +94,6 @@ public class AvroClassProcessor {
                 if (avroField != null) {
                     boolean isNullable = isNullable(avroField.schema());
                     addNullabilityAnnotation(field, isNullable);
-                    // Annotate getter method only if the field is not part of an inner class
                     if (!(field.getParentNode().isPresent() && field.getParentNode().get().getParentNode().isPresent() && field.getParentNode().get().getParentNode().get().getClass().getSimpleName().equals("ClassOrInterfaceDeclaration"))) {
                         String getterName = "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
                         cu.findAll(MethodDeclaration.class).stream()
@@ -75,14 +103,12 @@ public class AvroClassProcessor {
                         cu.findAll(MethodDeclaration.class).stream()
                                 .filter(m -> m.getNameAsString().equals(clearerName) && m.getParameters().isEmpty())
                                 .forEach(m -> addNullabilityAnnotationToMethod(m, false));
-                        // Annotate Builder setter method parameter
                         String setterName = "set" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
                         cu.findAll(MethodDeclaration.class).stream()
                             .filter(m -> m.getNameAsString().equals(setterName) && m.getParameters().size() == 1)
                             .forEach(m -> {
                                 Parameter param = m.getParameter(0);
                                 addNullabilityAnnotationToParameter(param, isNullable);
-                                // Annotate the setter method itself with @NotNull
                                 addNullabilityAnnotationToMethod(m, false);
                             });
                     }
@@ -102,7 +128,11 @@ public class AvroClassProcessor {
                         addNullabilityAnnotationToParameter(param, true);
                     });
 
-            try (FileWriter writer = new FileWriter(javaFile)) {
+            // Write to output directory, preserving relative path
+            Path relativePath = inputRoot.relativize(javaFile.toPath());
+            Path outputPath = outputRoot.resolve(relativePath);
+            Files.createDirectories(outputPath.getParent());
+            try (FileWriter writer = new FileWriter(outputPath.toFile())) {
                 writer.write(cu.toString());
             }
         }
@@ -117,7 +147,6 @@ public class AvroClassProcessor {
 
     private static void addNullabilityAnnotation(FieldDeclaration field, boolean isNullable) {
         String annotationName = isNullable ? NULLABLE_ANNOTATION : NOT_NULL_ANNOTATION;
-        field.getAnnotations().stream().forEach(annotation -> System.out.println(annotation.getNameAsString()));
         if (!hasAnnotation(field.getAnnotations(), annotationName)) {
             field.addAnnotation(new MarkerAnnotationExpr(annotationName));
         }
@@ -139,24 +168,5 @@ public class AvroClassProcessor {
 
     private static boolean hasAnnotation(NodeList<AnnotationExpr> annotations, String annotationName) {
         return annotations.stream().anyMatch(annotation -> annotation.getNameAsString().equals(annotationName));
-    }
-
-    public static void main(String[] args) throws IOException {
-        if (args.length != 2) {
-            System.err.println("Usage: AvroClassProcessor <generatedJavaDir> <schemaFile>");
-            System.exit(1);
-        }
-        String generatedClassesDir = args[0];
-        String schemaPath = args[1];
-        Schema schema = new Schema.Parser().parse(new File(schemaPath));
-        Files.walk(Paths.get(generatedClassesDir))
-                .filter(path -> path.toString().endsWith(".java"))
-                .forEach(path -> {
-                    try {
-                        processGeneratedClass(path.toFile(), schema);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                });
     }
 } 
