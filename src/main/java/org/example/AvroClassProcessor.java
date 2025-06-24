@@ -70,21 +70,23 @@ public class AvroClassProcessor {
                         // Annotate getter method only if the field is not part of an inner class
                         String getterName = "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
                         cu.findAll(MethodDeclaration.class).stream()
-                                .filter(m -> m.getNameAsString().equals(getterName) && m.getParameters().isEmpty())
-                                .forEach(m -> addNullabilityAnnotationToMethod(m, isNullable));
+                                .filter(method -> method.getNameAsString().equals(getterName) && method.getParameters().isEmpty())
+                                .forEach(getter -> addNullabilityAnnotationToMethod(getter, isNullable));
+
                         String clearerName = "clear" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
                         cu.findAll(MethodDeclaration.class).stream()
-                                .filter(m -> m.getNameAsString().equals(clearerName) && m.getParameters().isEmpty())
-                                .forEach(m -> addNullabilityAnnotationToMethod(m, false));
+                                .filter(method -> method.getNameAsString().equals(clearerName) && method.getParameters().isEmpty())
+                                .forEach(clearer -> addNullabilityAnnotationToMethod(clearer, false));
+
                         // Annotate Builder setter method parameter
                         String setterName = "set" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
                         cu.findAll(MethodDeclaration.class).stream()
-                                .filter(m -> m.getNameAsString().equals(setterName) && m.getParameters().size() == 1)
-                                .forEach(m -> {
-                                    Parameter param = m.getParameter(0);
+                                .filter(method -> method.getNameAsString().equals(setterName) && method.getParameters().size() == 1)
+                                .forEach(setter -> {
+                                    Parameter param = setter.getParameter(0);
                                     addNullabilityAnnotationToParameter(param, isNullable);
                                     // Annotate the setter method itself with @NotNull
-                                    addNullabilityAnnotationToMethod(m, false);
+                                    addNullabilityAnnotationToMethod(setter, false);
                                 });
 
                         if (isTemplatedType(avroField)) {
@@ -111,15 +113,15 @@ public class AvroClassProcessor {
             }
 
             cu.findAll(MethodDeclaration.class).stream()
-                    .filter(m -> m.getNameAsString().equals(BUILD_METHOD_NAME) && m.getParameters().isEmpty())
-                    .forEach(m -> addNullabilityAnnotationToMethod(m, false));
+                    .filter(method -> method.getNameAsString().equals(BUILD_METHOD_NAME) && method.getParameters().isEmpty())
+                    .forEach(buildMethod -> addNullabilityAnnotationToMethod(buildMethod, false));
             cu.findAll(MethodDeclaration.class).stream()
-                    .filter(m -> m.getNameAsString().equals(NEW_BUILD_METHOD_NAME))
-                    .forEach(m -> addNullabilityAnnotationToMethod(m, false));
+                    .filter(method -> method.getNameAsString().equals(NEW_BUILD_METHOD_NAME))
+                    .forEach(newBuilderMethod -> addNullabilityAnnotationToMethod(newBuilderMethod, false));
             cu.findAll(MethodDeclaration.class).stream()
-                    .filter(m -> m.getNameAsString().equals(NEW_BUILD_METHOD_NAME) && !m.getParameters().isEmpty())
-                    .forEach(m -> {
-                        Parameter param = m.getParameter(0);
+                    .filter(method -> method.getNameAsString().equals(NEW_BUILD_METHOD_NAME) && !method.getParameters().isEmpty())
+                    .forEach(newBuilderCopyMethod -> {
+                        Parameter param = newBuilderCopyMethod.getParameter(0);
                         addNullabilityAnnotationToParameter(param, true);
                     });
 
