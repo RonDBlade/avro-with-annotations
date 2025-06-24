@@ -1,12 +1,10 @@
 package org.example;
 
+import com.github.javaparser.HasParentNode;
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
-import com.github.javaparser.ast.body.ConstructorDeclaration;
-import com.github.javaparser.ast.body.FieldDeclaration;
-import com.github.javaparser.ast.body.MethodDeclaration;
-import com.github.javaparser.ast.body.Parameter;
+import com.github.javaparser.ast.body.*;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.MarkerAnnotationExpr;
 import com.github.javaparser.ast.nodeTypes.modifiers.NodeWithPublicModifier;
@@ -40,7 +38,7 @@ public class AvroClassProcessor {
      * It annotates fields and their corresponding getter and setter methods with @NotNull or @Nullable based on the field's nullability in the Avro schema.
      * Additionally, it marks public constructors as deprecated and updates their Javadoc.
      *
-     * @param javaFile The Java file to process.
+     * @param javaFile   The Java file to process.
      * @param avroSchema The Avro schema used to determine field nullability.
      * @throws IOException If an I/O error occurs while reading or writing the file.
      */
@@ -64,16 +62,16 @@ public class AvroClassProcessor {
             List<FieldDeclaration> fields = cu.findAll(FieldDeclaration.class);
             for (FieldDeclaration field : fields) {
                 String fieldName = field.getVariable(0).getNameAsString();
-                Schema.Field avroField = avroSchema.getField(fieldName);
-                if (avroField != null) {
-                    boolean isNullable = isNullable(avroField.schema());
-                    addNullabilityAnnotation(field, isNullable);
-                    // Annotate getter method only if the field is not part of an inner class
-                    if (!(field.getParentNode().isPresent() && field.getParentNode().get().getParentNode().isPresent() && field.getParentNode().get().getParentNode().get().getClass().getSimpleName().equals("ClassOrInterfaceDeclaration"))) {
+                if (isTopLevel(field)) {
+                    Schema.Field avroField = avroSchema.getField(fieldName);
+                    if (avroField != null) {
+                        boolean isNullable = isNullable(avroField.schema());
+                        addNullabilityAnnotation(field, isNullable);
+                        // Annotate getter method only if the field is not part of an inner class
                         String getterName = "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
                         cu.findAll(MethodDeclaration.class).stream()
-                            .filter(m -> m.getNameAsString().equals(getterName) && m.getParameters().isEmpty())
-                            .forEach(m -> addNullabilityAnnotationToMethod(m, isNullable));
+                                .filter(m -> m.getNameAsString().equals(getterName) && m.getParameters().isEmpty())
+                                .forEach(m -> addNullabilityAnnotationToMethod(m, isNullable));
                         String clearerName = "clear" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
                         cu.findAll(MethodDeclaration.class).stream()
                                 .filter(m -> m.getNameAsString().equals(clearerName) && m.getParameters().isEmpty())
@@ -81,25 +79,27 @@ public class AvroClassProcessor {
                         // Annotate Builder setter method parameter
                         String setterName = "set" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
                         cu.findAll(MethodDeclaration.class).stream()
-                            .filter(m -> m.getNameAsString().equals(setterName) && m.getParameters().size() == 1)
-                            .forEach(m -> {
-                                Parameter param = m.getParameter(0);
-                                addNullabilityAnnotationToParameter(param, isNullable);
-                                // Annotate the setter method itself with @NotNull
-                                addNullabilityAnnotationToMethod(m, false);
-                            });
+                                .filter(m -> m.getNameAsString().equals(setterName) && m.getParameters().size() == 1)
+                                .forEach(m -> {
+                                    Parameter param = m.getParameter(0);
+                                    addNullabilityAnnotationToParameter(param, isNullable);
+                                    // Annotate the setter method itself with @NotNull
+                                    addNullabilityAnnotationToMethod(m, false);
+                                });
 
                         if (isTemplatedType(avroField)) {
                             // Templates
                             NodeList<Type> fieldTypeTemplates = field.getCommonType().asClassOrInterfaceType().getTypeArguments().get();
                             NodeList<Type> getterReturnTypeTemplates = cu.findAll(MethodDeclaration.class).stream()
-                                    .filter(m -> m.getNameAsString().equals(getterName) && m.getParameters().isEmpty())
-                                    .map(m -> m.getType().asClassOrInterfaceType().getTypeArguments().get())
+                                    .filter(AvroClassProcessor::isTopLevel)
+                                    .filter(method -> method.getNameAsString().equals(getterName) && method.getParameters().isEmpty())
+                                    .map(getter -> getter.getType().asClassOrInterfaceType().getTypeArguments().get())
                                     .findFirst().get();
                             NodeList<Type> setterParameterTypeTemplates = cu.findAll(MethodDeclaration.class).stream()
-                                    .filter(m -> m.getNameAsString().equals(setterName) && m.getParameters().size() == 1)
-                                    .map(m -> m.getParameter(0))
-                                    .map(p -> p.getType().asClassOrInterfaceType().getTypeArguments().get())
+                                    .filter(AvroClassProcessor::isTopLevel)
+                                    .filter(method -> method.getNameAsString().equals(setterName) && method.getParameters().size() == 1)
+                                    .map(setter -> setter.getParameter(0))
+                                    .map(setterArgument -> setterArgument.getType().asClassOrInterfaceType().getTypeArguments().get())
                                     .findFirst().get();
 
                             addAnnotationsToTemplatesInRecursion(avroField.schema(), fieldTypeTemplates);
@@ -147,6 +147,11 @@ public class AvroClassProcessor {
                         .ifPresent(valueType -> addAnnotationsToTemplatesInRecursion(avroSchema.getValueType(), valueType));
             }
         }
+    }
+
+    private static boolean isTopLevel(HasParentNode<?> node) {
+        TypeDeclaration<?> typeDeclaration = node.findAncestor(TypeDeclaration.class).get();
+        return !typeDeclaration.isNestedType();
     }
 
     private static boolean isTemplatedType(Schema.Field avroField) {
