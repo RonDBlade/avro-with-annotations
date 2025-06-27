@@ -24,7 +24,6 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.Optional;
 
 public class AvroClassProcessor {
     private static final String NOT_NULL_ANNOTATION = "org.jetbrains.annotations.NotNull";
