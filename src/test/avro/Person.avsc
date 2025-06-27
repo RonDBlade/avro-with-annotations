@@ -11,6 +11,10 @@
       "name": "age",
       "type": ["null", "int"],
       "default": null
+    },
+    {
+      "name": "income",
+      "type": "int"
     }
   ]
 } 
