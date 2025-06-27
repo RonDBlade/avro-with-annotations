@@ -8,6 +8,7 @@ class PersonTest {
         // Create a person with required fields
         val person = Person.newBuilder().setId("123")
             .setAge(2)
+            .setIncome(2)
             .setListWithValues(listOf(1))
             .setListWithNullableValues(listOf(2, null))
             .setListWithListWithValues(listOf(listOf(10)))
@@ -16,6 +17,7 @@ class PersonTest {
             .setMapWithMapWithValues(mapOf("a" to mapOf("aa" to 10)))
             .build()
         // Required field should be non-null
+        person.income = 5
         assertEquals("123", person.id)
 
         val lnn: List<Int> = person.listWithValues

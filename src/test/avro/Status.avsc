@@ -1,0 +1,6 @@
+{
+  "type": "enum",
+  "name": "Status",
+  "namespace": "com.example",
+  "symbols": ["ACTIVE", "INACTIVE", "PENDING"] // Edit these symbols as needed
+}

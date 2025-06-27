@@ -13,6 +13,10 @@
       "default": null
     },
     {
+      "name": "income",
+      "type": "int"
+    },
+    {
       "name": "listWithValues",
       "type": {
         "type": "array",
