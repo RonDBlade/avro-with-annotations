@@ -72,29 +72,27 @@ public class AvroClassProcessor {
             List<FieldDeclaration> fields = cu.findAll(FieldDeclaration.class);
             for (FieldDeclaration field : fields) {
                 String fieldName = field.getVariable(0).getNameAsString();
-                boolean isTopLevelField = isTopLevel(field);
+                Schema.Field avroField = avroSchema.getField(fieldName);
 
-                if (isTopLevelField) {
-                    // Working on the actual schema class fields
-                    Schema.Field avroField = avroSchema.getField(fieldName);
+                if (isTopLevel(field)) {
                     if (avroField != null) {
-                        // Only working for top level fields that are written in the schema file
+                        // Working on the actual schema class fields
                         boolean isNullable = isNullableAccordingToSchema(avroField.schema());
                         addNullabilityAnnotation(field, isNullable);
 
                         String getterName = "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
                         cu.findAll(MethodDeclaration.class).stream()
-                                .filter(m -> m.getNameAsString().equals(getterName) && m.getParameters().isEmpty())
+                                .filter(method -> method.getNameAsString().equals(getterName) && method.getParameters().isEmpty())
                                 .filter(AvroClassProcessor::isTopLevel)
-                                .forEach(m -> addNullabilityAnnotationToMethod(m, isNullable));
+                                .forEach(getter -> addNullabilityAnnotationToMethod(getter, isNullable));
 
                         // Annotate Builder setter method parameter
                         String setterName = "set" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
                         cu.findAll(MethodDeclaration.class).stream()
-                                .filter(m -> m.getNameAsString().equals(setterName) && m.getParameters().size() == 1)
+                                .filter(method -> method.getNameAsString().equals(setterName) && method.getParameters().size() == 1)
                                 .filter(AvroClassProcessor::isTopLevel)
-                                .forEach(m -> {
-                                    Parameter param = m.getParameter(0);
+                                .forEach(setter -> {
+                                    Parameter param = setter.getParameter(0);
                                     addNullabilityAnnotationToParameter(param, isNullable);
                                 });
 
@@ -125,27 +123,47 @@ public class AvroClassProcessor {
 
                     String getterName = "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
                     cu.findAll(MethodDeclaration.class).stream()
-                            .filter(m -> m.getNameAsString().equals(getterName) && m.getParameters().isEmpty())
-                            .filter(m -> !isTopLevel(m))
-                            .forEach(m -> addNullabilityAnnotationToMethod(m, isNullable));
+                            .filter(method -> method.getNameAsString().equals(getterName) && method.getParameters().isEmpty())
+                            .filter(getter -> !isTopLevel(getter))
+                            .forEach(builderGetter -> addNullabilityAnnotationToMethod(builderGetter, isNullable));
 
                     String clearerName = "clear" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
                     cu.findAll(MethodDeclaration.class).stream()
-                            .filter(m -> m.getNameAsString().equals(clearerName) && m.getParameters().isEmpty())
-                            .filter(m -> !isTopLevel(m))
-                            .forEach(m -> addNullabilityAnnotationToMethod(m, false));
+                            .filter(method -> method.getNameAsString().equals(clearerName) && method.getParameters().isEmpty())
+                            .filter(clearer -> !isTopLevel(clearer))
+                            .forEach(builderClearer -> addNullabilityAnnotationToMethod(builderClearer, false));
 
                     // Annotate Builder setter method parameter
                     String setterName = "set" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
                     cu.findAll(MethodDeclaration.class).stream()
-                            .filter(m -> m.getNameAsString().equals(setterName) && m.getParameters().size() == 1)
-                            .filter(m -> !isTopLevel(m))
-                            .forEach(m -> {
-                                Parameter param = m.getParameter(0);
+                            .filter(method -> method.getNameAsString().equals(setterName) && method.getParameters().size() == 1)
+                            .filter(setter -> !isTopLevel(setter))
+                            .forEach(builderSetter -> {
+                                Parameter param = builderSetter.getParameter(0);
                                 addNullabilityAnnotationToParameter(param, isNullable);
                                 // Annotate the builders setter method itself with @NotNull
-                                addNullabilityAnnotationToMethod(m, false);
+                                addNullabilityAnnotationToMethod(builderSetter, false);
                             });
+
+                    if ((avroField != null) && isTemplatedType(avroField)) {
+                        // Templates
+                        NodeList<Type> fieldTypeTemplates = field.getCommonType().asClassOrInterfaceType().getTypeArguments().get();
+                        NodeList<Type> getterReturnTypeTemplates = cu.findAll(MethodDeclaration.class).stream()
+                                .filter(method -> !isTopLevel(method))
+                                .filter(builderMethod -> builderMethod.getNameAsString().equals(getterName) && builderMethod.getParameters().isEmpty())
+                                .map(builderGetter -> builderGetter.getType().asClassOrInterfaceType().getTypeArguments().get())
+                                .findFirst().get();
+                        NodeList<Type> setterParameterTypeTemplates = cu.findAll(MethodDeclaration.class).stream()
+                                .filter(method -> !isTopLevel(method))
+                                .filter(builderMethod -> builderMethod.getNameAsString().equals(setterName) && builderMethod.getParameters().size() == 1)
+                                .map(builderSetter -> builderSetter.getParameter(0))
+                                .map(setterArgument -> setterArgument.getType().asClassOrInterfaceType().getTypeArguments().get())
+                                .findFirst().get();
+
+                        addAnnotationsToTemplatesInRecursion(avroField.schema(), fieldTypeTemplates);
+                        addAnnotationsToTemplatesInRecursion(avroField.schema(), getterReturnTypeTemplates);
+                        addAnnotationsToTemplatesInRecursion(avroField.schema(), setterParameterTypeTemplates);
+                    }
                 }
             }
 
@@ -166,6 +184,13 @@ public class AvroClassProcessor {
                 writer.write(cu.toString());
             }
         }
+    }
+
+    private static boolean isNullableAccordingToSchema(Schema schema) {
+        if (schema.getType() == Schema.Type.UNION) {
+            return schema.getTypes().stream().anyMatch(type -> type.getType() == Schema.Type.NULL);
+        }
+        return false;
     }
 
     private static void addAnnotationsToTemplatesInRecursion(Schema avroSchema, NodeList<Type> typesOfTemplates) {
