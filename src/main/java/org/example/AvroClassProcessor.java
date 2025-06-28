@@ -67,7 +67,6 @@ public class AvroClassProcessor {
                     });
 
             Schema avroSchema = extractSchema(cu);
-
             List<FieldDeclaration> fields = cu.findAll(FieldDeclaration.class);
             for (FieldDeclaration field : fields) {
                 String fieldName = field.getVariable(0).getNameAsString();
@@ -250,7 +249,6 @@ public class AvroClassProcessor {
 
     private static void addNullabilityAnnotation(FieldDeclaration field, boolean isNullable) {
         String annotationName = isNullable ? NULLABLE_ANNOTATION : NOT_NULL_ANNOTATION;
-        field.getAnnotations().stream().forEach(annotation -> System.out.println(annotation.getNameAsString()));
         if (!hasAnnotation(field.getAnnotations(), annotationName)) {
             field.addAnnotation(new MarkerAnnotationExpr(annotationName));
         }
