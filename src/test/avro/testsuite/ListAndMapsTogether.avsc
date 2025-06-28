@@ -1,0 +1,48 @@
+{
+  "type": "record",
+  "name": "ListsAndMapsTogether",
+  "namespace": "com.example.testsuite",
+  "doc": "Lists with maps and vice versa in a field object",
+  "fields": [
+    {
+      "name": "listWithRegularMapWithRegularValues",
+      "type": {
+        "type": "array",
+        "items": {
+          "type": "map",
+          "values": "int"
+        }
+      }
+    },
+    {
+      "name": "listWithRegularMapWithNullableValues",
+      "type": {
+        "type": "array",
+        "items": {
+          "type": "map",
+          "values": ["null", "int"]
+        }
+      }
+    },
+    {
+      "name": "MapWithRegularListWithRegularValues",
+      "type": {
+        "type": "map",
+        "values": {
+          "type": "array",
+          "items": "int"
+        }
+      }
+    },
+    {
+      "name": "MapWithRegularListWithNullableValues",
+      "type": {
+        "type": "map",
+        "values": {
+          "type": "array",
+          "items": ["null", "int"]
+        }
+      }
+    }
+  ]
+}

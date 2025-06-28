@@ -1,0 +1,34 @@
+{
+  "type": "record",
+  "name": "DomainClassWrapper",
+  "namespace": "com.example.testsuite",
+  "doc": "A schema that represents some class that contains DomainClass type fields",
+  "fields": [
+    {
+      "name": "independentField",
+      "type": "string"
+    },
+    {
+      "name": "domainClass",
+      "type": "com.example.testsuite.DomainClass"
+    },
+    {
+      "name": "nullableDomainClass",
+      "type": ["null", "com.example.testsuite.DomainClass"]
+    },
+    {
+      "name": "listOfRegularDomainClass",
+      "type": {
+        "type": "array",
+        "items": "com.example.testsuite.DomainClass"
+      }
+    },
+    {
+      "name": "mapOfRegularDomainClass",
+      "type": {
+        "type": "map",
+        "values": "com.example.testsuite.DomainClass"
+      }
+    }
+  ]
+}
