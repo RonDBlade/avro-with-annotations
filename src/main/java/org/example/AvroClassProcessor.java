@@ -192,23 +192,43 @@ public class AvroClassProcessor {
     }
 
     private static void addAnnotationsToTemplatesInRecursion(Schema avroSchema, NodeList<Type> typesOfTemplates) {
-        switch (avroSchema.getType()) {
+        Schema trueSchema = getTrueFieldSchema(avroSchema);
+        switch (trueSchema.getType()) {
             case ARRAY -> {
-                boolean isNullableItem = isNullable(avroSchema.getElementType());
+                boolean isNullableItem = isNullable(trueSchema.getElementType());
                 addNullabilityToTemplateType(typesOfTemplates.get(0), isNullableItem);
 
                 typesOfTemplates.get(0).asClassOrInterfaceType().getTypeArguments()
-                        .ifPresent(itemType -> addAnnotationsToTemplatesInRecursion(avroSchema.getElementType(), itemType));
+                        .ifPresent(itemType -> addAnnotationsToTemplatesInRecursion(trueSchema.getElementType(), itemType));
             }
             case MAP -> {
-                boolean isNullableValue = isNullable(avroSchema.getValueType());
+                boolean isNullableValue = isNullable(trueSchema.getValueType());
                 addNullabilityToTemplateType(typesOfTemplates.get(0), false);
                 addNullabilityToTemplateType(typesOfTemplates.get(1), isNullableValue);
 
                 typesOfTemplates.get(1).asClassOrInterfaceType().getTypeArguments()
-                        .ifPresent(valueType -> addAnnotationsToTemplatesInRecursion(avroSchema.getValueType(), valueType));
+                        .ifPresent(valueType -> addAnnotationsToTemplatesInRecursion(trueSchema.getValueType(), valueType));
             }
         }
+    }
+
+    private static Schema getTrueFieldSchema(Schema avroSchema) {
+        if (avroSchema.getType() != Schema.Type.UNION) {
+            return avroSchema;
+        }
+
+        if (avroSchema.getTypes().size() >= 3) {
+            return avroSchema;
+        }
+
+        if (avroSchema.getTypes().stream().noneMatch(singleSchema -> singleSchema.getType() == Schema.Type.NULL)) {
+            return avroSchema;
+        }
+
+        return avroSchema.getTypes().stream()
+                .filter(singleSchema -> singleSchema.getType() != Schema.Type.NULL)
+                .findFirst()
+                .get();
     }
 
     private static boolean isTopLevel(HasParentNode<?> node) {
@@ -218,7 +238,9 @@ public class AvroClassProcessor {
 
     private static boolean isTemplatedType(Schema.Field avroField) {
         Set<Schema.Type> templatedAvroTypes = Set.of(Schema.Type.ARRAY, Schema.Type.MAP);
-        return templatedAvroTypes.contains(avroField.schema().getType());
+
+        Schema trueFieldSchema = getTrueFieldSchema(avroField.schema());
+        return templatedAvroTypes.contains(trueFieldSchema.getType());
     }
 
     private static boolean isNullable(Schema schema) {

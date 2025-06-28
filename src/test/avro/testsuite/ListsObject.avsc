@@ -1,0 +1,25 @@
+{
+  "type": "record",
+  "name": "ListsObject",
+  "namespace": "com.example.testsuite",
+  "doc": "A lists object that is meant to check conversion of lists",
+  "fields": [
+    {
+      "name": "listWithRegularValues",
+      "type": {
+        "type": "array",
+        "items": "int"
+      }
+    },
+    {
+      "name": "nullableListWithRegularValues",
+      "type": [
+        "null",
+        {
+          "type": "array",
+          "items": "int"
+        }
+      ]
+    }
+  ]
+}
