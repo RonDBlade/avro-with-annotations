@@ -4,7 +4,6 @@ import com.example.testsuite.DomainClassWrapper
 import com.example.testsuite.ListsAndMapsTogether
 import com.example.testsuite.ListsObject
 import com.example.testsuite.MapsObject
-import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import java.time.Instant
 
@@ -60,13 +59,17 @@ class BasicObjectTest {
 
         // 3 levels
         val listWithRegularListWithRegularValues: List<List<Int>> = data.listWithRegularListWithRegularValues
-        val nullableListWithRegularListWithRegularValues: List<List<Int>>? = data.nullableListWithRegularListWithRegularValues
+        val nullableListWithRegularListWithRegularValues: List<List<Int>>? =
+            data.nullableListWithRegularListWithRegularValues
         val listWithRegularListWithNullableValues: List<List<Int?>> = data.listWithRegularListWithNullableValues
-        val nullableListWithRegularListWithNullableValues: List<List<Int?>>? = data.nullableListWithRegularListWithNullableValues
+        val nullableListWithRegularListWithNullableValues: List<List<Int?>>? =
+            data.nullableListWithRegularListWithNullableValues
         val listWithNullableListWithRegularValues: List<List<Int>?> = data.listWithNullableListWithRegularValues
         val listWithNullableListWithNullableValues: List<List<Int?>?> = data.listWithNullableListWithNullableValues
-        val nullableListWithNullableListWithRegularValues: List<List<Int>?>? = data.nullableListWithNullableListWithRegularValues
-        val nullableListWithNullableListWithNullableValues: List<List<Int?>?>? = data.nullableListWithNullableListWithNullableValues
+        val nullableListWithNullableListWithRegularValues: List<List<Int>?>? =
+            data.nullableListWithNullableListWithRegularValues
+        val nullableListWithNullableListWithNullableValues: List<List<Int?>?>? =
+            data.nullableListWithNullableListWithNullableValues
     }
 
     @Test
@@ -80,12 +83,46 @@ class BasicObjectTest {
             // 3 levels
             .setMapWithRegularMapWithRegularValues(mapOf("a" to mapOf("aa" to 3)) as Map<String, Map<String, Int>>)
             .setNullableMapWithRegularMapWithRegularValues(mapOf("a" to mapOf("aa" to 30)) as Map<String, Map<String, Int>>?)
-            .setMapWithRegularMapWithNullableValues(mapOf("a" to mapOf("aa" to 4, "ab" to null)) as Map<String, Map<String, Int?>>)
-            .setNullableMapWithRegularMapWithNullableValues(mapOf("a" to mapOf("aa" to 40, "ab" to null)) as Map<String, Map<String, Int?>>?)
-            .setMapWithNullableMapWithRegularValues(mapOf("a" to mapOf("aa" to 5), "b" to null) as Map<String, Map<String, Int>?>)
-            .setMapWithNullableMapWithNullableValues(mapOf("a" to mapOf("aa" to 50, "ab" to null), "b" to null) as Map<String, Map<String, Int?>?>)
-            .setNullableMapWithNullableMapWithRegularValues(mapOf("a" to mapOf("aa" to 6, "ab" to null), "b" to null) as Map<String, Map<String, Int>?>?)
-            .setNullableMapWithNullableMapWithNullableValues(mapOf("a" to mapOf("aa" to 60, "ab" to null), "b" to null) as Map<String, Map<String, Int?>?>?)
+            .setMapWithRegularMapWithNullableValues(
+                mapOf(
+                    "a" to mapOf(
+                        "aa" to 4,
+                        "ab" to null
+                    )
+                ) as Map<String, Map<String, Int?>>
+            )
+            .setNullableMapWithRegularMapWithNullableValues(
+                mapOf(
+                    "a" to mapOf(
+                        "aa" to 40,
+                        "ab" to null
+                    )
+                ) as Map<String, Map<String, Int?>>?
+            )
+            .setMapWithNullableMapWithRegularValues(
+                mapOf(
+                    "a" to mapOf("aa" to 5),
+                    "b" to null
+                ) as Map<String, Map<String, Int>?>
+            )
+            .setMapWithNullableMapWithNullableValues(
+                mapOf(
+                    "a" to mapOf("aa" to 50, "ab" to null),
+                    "b" to null
+                ) as Map<String, Map<String, Int?>?>
+            )
+            .setNullableMapWithNullableMapWithRegularValues(
+                mapOf(
+                    "a" to mapOf("aa" to 6, "ab" to null),
+                    "b" to null
+                ) as Map<String, Map<String, Int>?>?
+            )
+            .setNullableMapWithNullableMapWithNullableValues(
+                mapOf(
+                    "a" to mapOf("aa" to 60, "ab" to null),
+                    "b" to null
+                ) as Map<String, Map<String, Int?>?>?
+            )
             .build()
 
         // 2 levels
@@ -96,13 +133,20 @@ class BasicObjectTest {
 
         // 3 levels
         val mapWithRegularMapWithRegularValues: Map<String, Map<String, Int>> = data.mapWithRegularMapWithRegularValues
-        val nullableMapWithRegularMapWithRegularValues: Map<String, Map<String, Int>>? = data.nullableMapWithRegularMapWithRegularValues
-        val mapWithRegularMapWithNullableValues: Map<String, Map<String, Int?>> = data.mapWithRegularMapWithNullableValues
-        val nullableMapWithRegularMapWithNullableValues: Map<String, Map<String, Int?>>? = data.nullableMapWithRegularMapWithNullableValues
-        val mapWithNullableMapWithRegularValues: Map<String, Map<String, Int>?> = data.mapWithNullableMapWithRegularValues
-        val mapWithNullableMapWithNullableValues: Map<String, Map<String, Int?>?> = data.mapWithNullableMapWithNullableValues
-        val nullableMapWithNullableMapWithRegularValues: Map<String, Map<String, Int>?>? = data.nullableMapWithNullableMapWithRegularValues
-        val nullableMapWithNullableMapWithNullableValues: Map<String, Map<String, Int?>?>? = data.nullableMapWithNullableMapWithNullableValues
+        val nullableMapWithRegularMapWithRegularValues: Map<String, Map<String, Int>>? =
+            data.nullableMapWithRegularMapWithRegularValues
+        val mapWithRegularMapWithNullableValues: Map<String, Map<String, Int?>> =
+            data.mapWithRegularMapWithNullableValues
+        val nullableMapWithRegularMapWithNullableValues: Map<String, Map<String, Int?>>? =
+            data.nullableMapWithRegularMapWithNullableValues
+        val mapWithNullableMapWithRegularValues: Map<String, Map<String, Int>?> =
+            data.mapWithNullableMapWithRegularValues
+        val mapWithNullableMapWithNullableValues: Map<String, Map<String, Int?>?> =
+            data.mapWithNullableMapWithNullableValues
+        val nullableMapWithNullableMapWithRegularValues: Map<String, Map<String, Int>?>? =
+            data.nullableMapWithNullableMapWithRegularValues
+        val nullableMapWithNullableMapWithNullableValues: Map<String, Map<String, Int?>?>? =
+            data.nullableMapWithNullableMapWithNullableValues
     }
 
     @Test
@@ -124,28 +168,44 @@ class BasicObjectTest {
     fun `schema classes conversion`() {
         val data = DomainClassWrapper.newBuilder()
             .setIndependentField("hi" as String)
-            .setDomainClass(DomainClass.newBuilder()
-                .setField1("1" as String)
-                .setField2(1 as Int)
-                .build() as DomainClass)
+            .setDomainClass(
+                DomainClass.newBuilder()
+                    .setField1("1" as String)
+                    .setField2(1 as Int)
+                    .build() as DomainClass
+            )
             .setDomainClassBuilder(null)
-            .setDomainClassBuilder(DomainClass.newBuilder()
-                .setField1("2" as String)
-                .setField2(2 as Int) as DomainClass.Builder?)
+            .setDomainClassBuilder(
+                DomainClass.newBuilder()
+                    .setField1("2" as String)
+                    .setField2(2 as Int) as DomainClass.Builder?
+            )
             .setNullableDomainClassBuilder(null)
             .setNullableDomainClass(null)
-            .setListOfRegularDomainClass(listOf(DomainClass.newBuilder()
-                .setField1("3")
-                .setField2(3)
-                .build()) as List<DomainClass>)
-            .setMapOfRegularDomainClass(mapOf("a" to DomainClass.newBuilder()
-                .setField1("4")
-                .setField2(4)
-                .build()) as Map<String, DomainClass>)
-            .setMapOfRegularDomainClass(mapOf("a" to DomainClass.newBuilder()
-                .setField1("4")
-                .setField2(4)
-                .build()) as Map<String, DomainClass>)
+            .setListOfRegularDomainClass(
+                listOf(
+                    DomainClass.newBuilder()
+                        .setField1("3")
+                        .setField2(3)
+                        .build()
+                ) as List<DomainClass>
+            )
+            .setMapOfRegularDomainClass(
+                mapOf(
+                    "a" to DomainClass.newBuilder()
+                        .setField1("4")
+                        .setField2(4)
+                        .build()
+                ) as Map<String, DomainClass>
+            )
+            .setMapOfRegularDomainClass(
+                mapOf(
+                    "a" to DomainClass.newBuilder()
+                        .setField1("4")
+                        .setField2(4)
+                        .build()
+                ) as Map<String, DomainClass>
+            )
             .build()
 
         val independentField: String = data.independentField
