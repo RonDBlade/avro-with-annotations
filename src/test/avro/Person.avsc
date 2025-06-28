@@ -15,6 +15,54 @@
     {
       "name": "income",
       "type": "int"
+    },
+    {
+      "name": "listWithValues",
+      "type": {
+        "type": "array",
+        "items": "int"
+      }
+    },
+    {
+      "name": "listWithNullableValues",
+      "type": {
+        "type": "array",
+        "items": ["null", "int"]
+      }
+    },
+    {
+      "name": "listWithListWithValues",
+      "type": {
+        "type": "array",
+        "items": {
+          "type": "array",
+          "items": "int"
+        }
+      }
+    },
+    {
+      "name": "mapWithValues",
+      "type": {
+        "type": "map",
+        "values": "int"
+      }
+    },
+    {
+      "name": "mapWithNullableValues",
+      "type": {
+        "type": "map",
+        "values": ["null", "int"]
+      }
+    },
+    {
+      "name": "mapWithMapWithValues",
+      "type": {
+        "type": "map",
+        "values": {
+          "type": "map",
+          "values": "int"
+        }
+      }
     }
   ]
 } 
