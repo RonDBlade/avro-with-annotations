@@ -1,5 +1,6 @@
 import com.example.testsuite.BasicObject
 import com.example.testsuite.ListsObject
+import com.example.testsuite.MapsObject
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import java.time.Instant
@@ -63,5 +64,41 @@ class BasicObjectTest {
         val listWithNullableListWithNullableValues: List<List<Int?>?> = data.listWithNullableListWithNullableValues
         val nullableListWithNullableListWithRegularValues: List<List<Int>?>? = data.nullableListWithNullableListWithRegularValues
         val nullableListWithNullableListWithNullableValues: List<List<Int?>?>? = data.nullableListWithNullableListWithNullableValues
+    }
+
+    @Test
+    fun `converting maps values stuff`() {
+        val data = MapsObject.newBuilder()
+            // 2 levels
+            .setMapWithRegularValues(mapOf("a" to 1) as Map<String, Int>?)
+            .setNullableMapWithRegularValues(mapOf("a" to 10) as Map<String, Int>?)
+            .setMapWithNullableValues(mapOf("a" to 2, "b" to null) as Map<String, Int?>?)
+            .setNullableMapWithNullableValues(mapOf("a" to 20, "b" to null) as Map<String, Int?>?)
+            // 3 levels
+            .setMapWithRegularMapWithRegularValues(mapOf("a" to mapOf("aa" to 3)) as Map<String, Map<String, Int>>?)
+            .setNullableMapWithRegularMapWithRegularValues(mapOf("a" to mapOf("aa" to 30)) as Map<String, Map<String, Int>>?)
+            .setMapWithRegularMapWithNullableValues(mapOf("a" to mapOf("aa" to 4, "ab" to null)) as Map<String, Map<String, Int?>>?)
+            .setNullableMapWithRegularMapWithNullableValues(mapOf("a" to mapOf("aa" to 40, "ab" to null)) as Map<String, Map<String, Int?>>?)
+            .setMapWithNullableMapWithRegularValues(mapOf("a" to mapOf("aa" to 5), "b" to null) as Map<String, Map<String, Int>?>?)
+            .setMapWithNullableMapWithNullableValues(mapOf("a" to mapOf("aa" to 50, "ab" to null), "b" to null) as Map<String, Map<String, Int?>?>?)
+            .setNullableMapWithNullableMapWithRegularValues(mapOf("a" to mapOf("aa" to 6, "ab" to null), "b" to null) as Map<String, Map<String, Int>?>?)
+            .setNullableMapWithNullableMapWithNullableValues(mapOf("a" to mapOf("aa" to 60, "ab" to null), "b" to null) as Map<String, Map<String, Int?>?>?)
+            .build()
+
+        // 2 levels
+        val mapWithRegularValues: Map<String, Int> = data.mapWithRegularValues
+        val nullableMapWithRegularValues: Map<String, Int>? = data.nullableMapWithRegularValues
+        val mapWithNullableValues: Map<String, Int?> = data.mapWithNullableValues
+        val nullableMapWithNullableValues: Map<String, Int?>? = data.nullableMapWithNullableValues
+
+        // 3 levels
+        val mapWithRegularMapWithRegularValues: Map<String, Map<String, Int>> = data.mapWithRegularMapWithRegularValues
+        val nullableMapWithRegularMapWithRegularValues: Map<String, Map<String, Int>>? = data.nullableMapWithRegularMapWithRegularValues
+        val mapWithRegularMapWithNullableValues: Map<String, Map<String, Int?>> = data.mapWithRegularMapWithNullableValues
+        val nullableMapWithRegularMapWithNullableValues: Map<String, Map<String, Int?>>? = data.nullableMapWithRegularMapWithNullableValues
+        val mapWithNullableMapWithRegularValues: Map<String, Map<String, Int>?> = data.mapWithNullableMapWithRegularValues
+        val mapWithNullableMapWithNullableValues: Map<String, Map<String, Int?>?> = data.mapWithNullableMapWithNullableValues
+        val nullableMapWithNullableMapWithRegularValues: Map<String, Map<String, Int>?>? = data.nullableMapWithNullableMapWithRegularValues
+        val nullableMapWithNullableMapWithNullableValues: Map<String, Map<String, Int?>?>? = data.nullableMapWithNullableMapWithNullableValues
     }
 }

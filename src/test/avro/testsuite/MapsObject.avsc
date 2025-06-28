@@ -1,0 +1,146 @@
+{
+  "type": "record",
+  "name": "MapsObject",
+  "namespace": "com.example.testsuite",
+  "doc": "A maps object that is meant to check conversion of maps",
+  "fields": [
+    {
+      "name": "mapWithRegularValues",
+      "type": {
+        "type": "map",
+        "values": "int"
+      }
+    },
+    {
+      "name": "nullableMapWithRegularValues",
+      "type": [
+        "null",
+        {
+          "type": "map",
+          "values": "int"
+        }
+      ]
+    },
+    {
+      "name": "mapWithNullableValues",
+      "type": {
+        "type": "map",
+        "values": ["null", "int"]
+      }
+    },
+    {
+      "name": "nullableMapWithNullableValues",
+      "type": [
+        "null",
+        {
+          "type": "map",
+          "values": ["null", "int"]
+        }
+      ]
+    },
+    {
+      "name": "mapWithRegularMapWithRegularValues",
+      "type": {
+        "type": "map",
+        "values": {
+          "type": "map",
+          "values": "int"
+        }
+      }
+    },
+    {
+      "name": "nullableMapWithRegularMapWithRegularValues",
+      "type": [
+        "null",
+        {
+          "type": "map",
+          "values": {
+            "type": "map",
+            "values": "int"
+          }
+        }
+      ]
+    },
+    {
+      "name": "mapWithRegularMapWithNullableValues",
+      "type": {
+        "type": "map",
+        "values": {
+          "type": "map",
+          "values": ["null", "int"]
+        }
+      }
+    },
+    {
+      "name": "nullableMapWithRegularMapWithNullableValues",
+      "type": [
+        "null",
+        {
+          "type": "map",
+          "values": {
+            "type": "map",
+            "values": ["null", "int"]
+          }
+        }
+      ]
+    },
+    {
+      "name": "mapWithNullableMapWithRegularValues",
+      "type": {
+        "type": "map",
+        "values": [
+          "null",
+          {
+            "type": "map",
+            "values": "int"
+          }
+        ]
+      }
+    },
+    {
+      "name": "mapWithNullableMapWithNullableValues",
+      "type": {
+        "type": "map",
+        "values": [
+          "null",
+          {
+            "type": "map",
+            "values": ["null", "int"]
+          }
+        ]
+      }
+    },
+    {
+      "name": "nullableMapWithNullableMapWithRegularValues",
+      "type": [
+        "null",
+        {
+          "type": "map",
+          "values": [
+            "null",
+            {
+              "type": "map",
+              "values": "int"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "nullableMapWithNullableMapWithNullableValues",
+      "type": [
+        "null",
+        {
+          "type": "map",
+          "values": [
+            "null",
+            {
+              "type": "map",
+              "values": ["null", "int"]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
