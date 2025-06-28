@@ -7,7 +7,7 @@ import com.example.testsuite.MapsObject
 import org.junit.jupiter.api.Test
 import java.time.Instant
 
-class BasicObjectTest {
+class AvroRecordConversionTest {
 
     @Test
     fun `test conversion of basic data stuff`() {
