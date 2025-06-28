@@ -6,9 +6,8 @@ import java.time.Instant
 
 class BasicObjectTest {
 
-    @DisplayName("Test conversion of stuff using explicit auto-typing.")
     @Test
-    fun `test conversion of stuff`() {
+    fun `test conversion of basic data stuff`() {
         val data = BasicObject.newBuilder()
             .setPrimitive(1)
             .setNullablePrimitive(10 as Int?)
@@ -31,14 +30,38 @@ class BasicObjectTest {
     }
 
     @Test
-    fun `converting list values`() {
+    fun `converting list values stuff`() {
         val data = ListsObject.newBuilder()
-            .setListWithRegularValues(listOf(1) as List<Int>)
+            // 2 levels
+            .setListWithRegularValues(listOf(1) as List<Int>?)
             .setNullableListWithRegularValues(listOf(10) as List<Int>?)
+            .setListWithNullableValues(listOf(2, null) as List<Int?>?)
+            .setNullableListWithNullableValues(listOf(20, null) as List<Int?>?)
+            // 3 levels
+            .setListWithRegularListWithRegularValues(listOf(listOf(3)) as List<List<Int>>?)
+            .setNullableListWithRegularListWithRegularValues(listOf(listOf(30)) as List<List<Int>>?)
+            .setListWithRegularListWithNullableValues(listOf(listOf(4, null)) as List<List<Int?>>?)
+            .setNullableListWithRegularListWithNullableValues(listOf(listOf(40, null)) as List<List<Int?>>?)
+            .setListWithNullableListWithRegularValues(listOf(listOf(5), null) as List<List<Int>?>?)
+            .setListWithNullableListWithNullableValues(listOf(listOf(50, null), null) as List<List<Int?>?>?)
+            .setNullableListWithNullableListWithRegularValues(listOf(listOf(6, null), null) as List<List<Int>?>?)
+            .setNullableListWithNullableListWithNullableValues(listOf(listOf(60, null), null) as List<List<Int?>?>?)
             .build()
 
+        // 2 levels
         val listWithRegularValues: List<Int> = data.listWithRegularValues
-        val nullableListWithRegularValues: List<Int?>? = data.nullableListWithRegularValues
+        val nullableListWithRegularValues: List<Int>? = data.nullableListWithRegularValues
+        val listWithNullableValues: List<Int?> = data.listWithNullableValues
+        val nullableListWithNullableValues: List<Int?>? = data.nullableListWithNullableValues
 
+        // 3 levels
+        val listWithRegularListWithRegularValues: List<List<Int>> = data.listWithRegularListWithRegularValues
+        val nullableListWithRegularListWithRegularValues: List<List<Int>>? = data.nullableListWithRegularListWithRegularValues
+        val listWithRegularListWithNullableValues: List<List<Int?>> = data.listWithRegularListWithNullableValues
+        val nullableListWithRegularListWithNullableValues: List<List<Int?>>? = data.nullableListWithRegularListWithNullableValues
+        val listWithNullableListWithRegularValues: List<List<Int>?> = data.listWithNullableListWithRegularValues
+        val listWithNullableListWithNullableValues: List<List<Int?>?> = data.listWithNullableListWithNullableValues
+        val nullableListWithNullableListWithRegularValues: List<List<Int>?>? = data.nullableListWithNullableListWithRegularValues
+        val nullableListWithNullableListWithNullableValues: List<List<Int?>?>? = data.nullableListWithNullableListWithNullableValues
     }
 }

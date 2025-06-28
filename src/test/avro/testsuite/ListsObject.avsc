@@ -20,6 +20,127 @@
           "items": "int"
         }
       ]
+    },
+    {
+      "name": "listWithNullableValues",
+      "type": {
+        "type": "array",
+        "items": ["null", "int"]
+      }
+    },
+    {
+      "name": "nullableListWithNullableValues",
+      "type": [
+        "null",
+        {
+          "type": "array",
+          "items": ["null", "int"]
+        }
+      ]
+    },
+    {
+      "name": "listWithRegularListWithRegularValues",
+      "type": {
+        "type": "array",
+        "items": {
+          "type": "array",
+          "items": "int"
+        }
+      }
+    },
+    {
+      "name": "nullableListWithRegularListWithRegularValues",
+      "type": [
+        "null",
+        {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": "int"
+          }
+        }
+      ]
+    },
+    {
+      "name": "listWithRegularListWithNullableValues",
+      "type": {
+        "type": "array",
+        "items": {
+          "type": "array",
+          "items": ["null", "int"]
+        }
+      }
+    },
+    {
+      "name": "nullableListWithRegularListWithNullableValues",
+      "type": [
+        "null",
+        {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": ["null", "int"]
+          }
+        }
+      ]
+    },
+    {
+      "name": "listWithNullableListWithRegularValues",
+      "type": {
+        "type": "array",
+        "items": [
+          "null",
+          {
+            "type": "array",
+            "items": "int"
+          }
+        ]
+      }
+    },
+    {
+      "name": "listWithNullableListWithNullableValues",
+      "type": {
+        "type": "array",
+        "items": [
+          "null",
+          {
+            "type": "array",
+            "items": ["null", "int"]
+          }
+        ]
+      }
+    },
+    {
+      "name": "nullableListWithNullableListWithRegularValues",
+      "type": [
+        "null",
+        {
+          "type": "array",
+          "items": [
+            "null",
+            {
+              "type": "array",
+              "items": "int"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "nullableListWithNullableListWithNullableValues",
+      "type": [
+        "null",
+        {
+          "type": "array",
+          "items": [
+            "null",
+            {
+              "type": "array",
+              "items": ["null", "int"]
+            }
+          ]
+        }
+      ]
     }
   ]
 }
