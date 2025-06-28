@@ -118,7 +118,7 @@ public class AvroClassProcessor {
                     // Working on the builder fields
                     if (avroField != null) {
                         // Fields in the builder from the schema
-                        boolean isNullable = isNullable(avroField.schema());
+                        boolean isNullable = !field.getCommonType().isPrimitiveType();
                         addNullabilityAnnotation(field, isNullable);
 
                         String getterName = "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
@@ -140,7 +140,7 @@ public class AvroClassProcessor {
                                 .filter(setter -> !isTopLevel(setter))
                                 .forEach(builderSetter -> {
                                     Parameter param = builderSetter.getParameter(0);
-                                    addNullabilityAnnotationToParameter(param, isNullable);
+                                    addNullabilityAnnotationToParameter(param, isNullable(avroField.schema()));
                                     // Annotate the builders setter method itself with @NotNull
                                     addNullabilityAnnotationToMethod(builderSetter, false);
                                 });
