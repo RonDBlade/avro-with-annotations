@@ -1,4 +1,5 @@
 import com.example.testsuite.BasicObject
+import com.example.testsuite.ListsAndMapsTogether
 import com.example.testsuite.ListsObject
 import com.example.testsuite.MapsObject
 import org.junit.jupiter.api.DisplayName
@@ -100,5 +101,20 @@ class BasicObjectTest {
         val mapWithNullableMapWithNullableValues: Map<String, Map<String, Int?>?> = data.mapWithNullableMapWithNullableValues
         val nullableMapWithNullableMapWithRegularValues: Map<String, Map<String, Int>?>? = data.nullableMapWithNullableMapWithRegularValues
         val nullableMapWithNullableMapWithNullableValues: Map<String, Map<String, Int?>?>? = data.nullableMapWithNullableMapWithNullableValues
+    }
+
+    @Test
+    fun `list and maps together conversion`() {
+        val data = ListsAndMapsTogether.newBuilder()
+            .setListWithRegularMapWithRegularValues(listOf(mapOf("a" to 1)) as List<Map<String, Int>>?)
+            .setListWithRegularMapWithNullableValues(listOf(mapOf("a" to 10, "b" to null)) as List<Map<String, Int?>>?)
+            .setMapWithRegularListWithRegularValues(mapOf("a" to listOf(2)) as Map<String, List<Int>>?)
+            .setMapWithRegularListWithNullableValues(mapOf("a" to listOf(20, null)) as Map<String, List<Int?>>?)
+            .build()
+
+        val listWithRegularMapWithRegularValues: List<Map<String, Int>> = data.listWithRegularMapWithRegularValues
+        val listWithRegularMapWithNullableValues: List<Map<String, Int?>> = data.listWithRegularMapWithNullableValues
+        val mapWithRegularListWithRegularValues: Map<String, List<Int>> = data.mapWithRegularListWithRegularValues
+        val mapWithRegularListWithNullableValues: Map<String, List<Int?>> = data.mapWithRegularListWithNullableValues
     }
 }
