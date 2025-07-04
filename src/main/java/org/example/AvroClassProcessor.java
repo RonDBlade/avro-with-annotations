@@ -75,7 +75,7 @@ public class AvroClassProcessor {
                 if (isTopLevel(field)) {
                     if (avroField != null) {
                         // Working on the actual schema class fields
-                        boolean isNullable = isNullableAccordingToSchema(avroField.schema());
+                        boolean isNullable = isNullable(avroField.schema());
                         addNullabilityAnnotation(field, isNullable);
 
                         String getterName = "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
@@ -116,51 +116,82 @@ public class AvroClassProcessor {
                     }
                 } else {
                     // Working on the builder fields
-                    boolean isNullable = !field.getCommonType().isPrimitiveType();
-                    addNullabilityAnnotation(field, isNullable);
+                    if (avroField != null) {
+                        // Fields in the builder from the schema
+                        boolean isNullable = !field.getCommonType().isPrimitiveType();
+                        addNullabilityAnnotation(field, isNullable);
 
-                    String getterName = "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
-                    cu.findAll(MethodDeclaration.class).stream()
-                            .filter(method -> method.getNameAsString().equals(getterName) && method.getParameters().isEmpty())
-                            .filter(getter -> !isTopLevel(getter))
-                            .forEach(builderGetter -> addNullabilityAnnotationToMethod(builderGetter, isNullable));
+                        String getterName = "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
+                        cu.findAll(MethodDeclaration.class).stream()
+                                .filter(method -> method.getNameAsString().equals(getterName) && method.getParameters().isEmpty())
+                                .filter(getter -> !isTopLevel(getter))
+                                .forEach(builderGetter -> addNullabilityAnnotationToMethod(builderGetter, isNullable));
 
-                    String clearerName = "clear" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
-                    cu.findAll(MethodDeclaration.class).stream()
-                            .filter(method -> method.getNameAsString().equals(clearerName) && method.getParameters().isEmpty())
-                            .filter(clearer -> !isTopLevel(clearer))
-                            .forEach(builderClearer -> addNullabilityAnnotationToMethod(builderClearer, false));
+                        String clearerName = "clear" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
+                        cu.findAll(MethodDeclaration.class).stream()
+                                .filter(method -> method.getNameAsString().equals(clearerName) && method.getParameters().isEmpty())
+                                .filter(clearer -> !isTopLevel(clearer))
+                                .forEach(builderClearer -> addNullabilityAnnotationToMethod(builderClearer, false));
 
-                    // Annotate Builder setter method parameter
-                    String setterName = "set" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
-                    cu.findAll(MethodDeclaration.class).stream()
-                            .filter(method -> method.getNameAsString().equals(setterName) && method.getParameters().size() == 1)
-                            .filter(setter -> !isTopLevel(setter))
-                            .forEach(builderSetter -> {
-                                Parameter param = builderSetter.getParameter(0);
-                                addNullabilityAnnotationToParameter(param, isNullable);
-                                // Annotate the builders setter method itself with @NotNull
-                                addNullabilityAnnotationToMethod(builderSetter, false);
-                            });
+                        // Annotate Builder setter method parameter
+                        String setterName = "set" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
+                        cu.findAll(MethodDeclaration.class).stream()
+                                .filter(method -> method.getNameAsString().equals(setterName) && method.getParameters().size() == 1)
+                                .filter(setter -> !isTopLevel(setter))
+                                .forEach(builderSetter -> {
+                                    Parameter param = builderSetter.getParameter(0);
+                                    addNullabilityAnnotationToParameter(param, isNullable(avroField.schema()));
+                                    // Annotate the builders setter method itself with @NotNull
+                                    addNullabilityAnnotationToMethod(builderSetter, false);
+                                });
 
-                    if ((avroField != null) && isTemplatedType(avroField)) {
-                        // Templates
-                        NodeList<Type> fieldTypeTemplates = field.getCommonType().asClassOrInterfaceType().getTypeArguments().get();
-                        NodeList<Type> getterReturnTypeTemplates = cu.findAll(MethodDeclaration.class).stream()
-                                .filter(method -> !isTopLevel(method))
-                                .filter(builderMethod -> builderMethod.getNameAsString().equals(getterName) && builderMethod.getParameters().isEmpty())
-                                .map(builderGetter -> builderGetter.getType().asClassOrInterfaceType().getTypeArguments().get())
-                                .findFirst().get();
-                        NodeList<Type> setterParameterTypeTemplates = cu.findAll(MethodDeclaration.class).stream()
-                                .filter(method -> !isTopLevel(method))
-                                .filter(builderMethod -> builderMethod.getNameAsString().equals(setterName) && builderMethod.getParameters().size() == 1)
-                                .map(builderSetter -> builderSetter.getParameter(0))
-                                .map(setterArgument -> setterArgument.getType().asClassOrInterfaceType().getTypeArguments().get())
-                                .findFirst().get();
+                        if (isTemplatedType(avroField)) {
+                            // Templates
+                            NodeList<Type> fieldTypeTemplates = field.getCommonType().asClassOrInterfaceType().getTypeArguments().get();
+                            NodeList<Type> getterReturnTypeTemplates = cu.findAll(MethodDeclaration.class).stream()
+                                    .filter(method -> !isTopLevel(method))
+                                    .filter(builderMethod -> builderMethod.getNameAsString().equals(getterName) && builderMethod.getParameters().isEmpty())
+                                    .map(builderGetter -> builderGetter.getType().asClassOrInterfaceType().getTypeArguments().get())
+                                    .findFirst().get();
+                            NodeList<Type> setterParameterTypeTemplates = cu.findAll(MethodDeclaration.class).stream()
+                                    .filter(method -> !isTopLevel(method))
+                                    .filter(builderMethod -> builderMethod.getNameAsString().equals(setterName) && builderMethod.getParameters().size() == 1)
+                                    .map(builderSetter -> builderSetter.getParameter(0))
+                                    .map(setterArgument -> setterArgument.getType().asClassOrInterfaceType().getTypeArguments().get())
+                                    .findFirst().get();
 
-                        addAnnotationsToTemplatesInRecursion(avroField.schema(), fieldTypeTemplates);
-                        addAnnotationsToTemplatesInRecursion(avroField.schema(), getterReturnTypeTemplates);
-                        addAnnotationsToTemplatesInRecursion(avroField.schema(), setterParameterTypeTemplates);
+                            addAnnotationsToTemplatesInRecursion(avroField.schema(), fieldTypeTemplates);
+                            addAnnotationsToTemplatesInRecursion(avroField.schema(), getterReturnTypeTemplates);
+                            addAnnotationsToTemplatesInRecursion(avroField.schema(), setterParameterTypeTemplates);
+                        }
+                    } else {
+                        // The additional builder fields. Meaning, those who end with the word "builder"
+                        boolean isNullable = true;
+                        addNullabilityAnnotation(field, isNullable);
+
+                        String getterName = "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
+                        cu.findAll(MethodDeclaration.class).stream()
+                                .filter(method -> method.getNameAsString().equals(getterName) && method.getParameters().isEmpty())
+                                .filter(getter -> !isTopLevel(getter))
+                                .forEach(builderGetter -> addNullabilityAnnotationToMethod(builderGetter, isNullable));
+
+                        String clearerName = "clear" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
+                        cu.findAll(MethodDeclaration.class).stream()
+                                .filter(method -> method.getNameAsString().equals(clearerName) && method.getParameters().isEmpty())
+                                .filter(clearer -> !isTopLevel(clearer))
+                                .forEach(builderClearer -> addNullabilityAnnotationToMethod(builderClearer, false));
+
+                        // Annotate Builder setter method parameter
+                        String setterName = "set" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
+                        cu.findAll(MethodDeclaration.class).stream()
+                                .filter(method -> method.getNameAsString().equals(setterName) && method.getParameters().size() == 1)
+                                .filter(setter -> !isTopLevel(setter))
+                                .forEach(builderSetter -> {
+                                    Parameter param = builderSetter.getParameter(0);
+                                    addNullabilityAnnotationToParameter(param, isNullable);
+                                    // Annotate the builders setter method itself with @NotNull
+                                    addNullabilityAnnotationToMethod(builderSetter, false);
+                                });
                     }
                 }
             }
@@ -184,31 +215,44 @@ public class AvroClassProcessor {
         }
     }
 
-    private static boolean isNullableAccordingToSchema(Schema schema) {
-        if (schema.getType() == Schema.Type.UNION) {
-            return schema.getTypes().stream().anyMatch(type -> type.getType() == Schema.Type.NULL);
-        }
-        return false;
-    }
-
     private static void addAnnotationsToTemplatesInRecursion(Schema avroSchema, NodeList<Type> typesOfTemplates) {
-        switch (avroSchema.getType()) {
+        Schema trueSchema = getTrueFieldSchema(avroSchema);
+        switch (trueSchema.getType()) {
             case ARRAY -> {
-                boolean isNullableItem = isNullable(avroSchema.getElementType());
+                boolean isNullableItem = isNullable(trueSchema.getElementType());
                 addNullabilityToTemplateType(typesOfTemplates.get(0), isNullableItem);
 
                 typesOfTemplates.get(0).asClassOrInterfaceType().getTypeArguments()
-                        .ifPresent(itemType -> addAnnotationsToTemplatesInRecursion(avroSchema.getElementType(), itemType));
+                        .ifPresent(itemType -> addAnnotationsToTemplatesInRecursion(trueSchema.getElementType(), itemType));
             }
             case MAP -> {
-                boolean isNullableValue = isNullable(avroSchema.getValueType());
+                boolean isNullableValue = isNullable(trueSchema.getValueType());
                 addNullabilityToTemplateType(typesOfTemplates.get(0), false);
                 addNullabilityToTemplateType(typesOfTemplates.get(1), isNullableValue);
 
                 typesOfTemplates.get(1).asClassOrInterfaceType().getTypeArguments()
-                        .ifPresent(valueType -> addAnnotationsToTemplatesInRecursion(avroSchema.getValueType(), valueType));
+                        .ifPresent(valueType -> addAnnotationsToTemplatesInRecursion(trueSchema.getValueType(), valueType));
             }
         }
+    }
+
+    private static Schema getTrueFieldSchema(Schema avroSchema) {
+        if (avroSchema.getType() != Schema.Type.UNION) {
+            return avroSchema;
+        }
+
+        if (avroSchema.getTypes().size() >= 3) {
+            return avroSchema;
+        }
+
+        if (avroSchema.getTypes().stream().noneMatch(singleSchema -> singleSchema.getType() == Schema.Type.NULL)) {
+            return avroSchema;
+        }
+
+        return avroSchema.getTypes().stream()
+                .filter(singleSchema -> singleSchema.getType() != Schema.Type.NULL)
+                .findFirst()
+                .get();
     }
 
     private static boolean isTopLevel(HasParentNode<?> node) {
@@ -218,7 +262,9 @@ public class AvroClassProcessor {
 
     private static boolean isTemplatedType(Schema.Field avroField) {
         Set<Schema.Type> templatedAvroTypes = Set.of(Schema.Type.ARRAY, Schema.Type.MAP);
-        return templatedAvroTypes.contains(avroField.schema().getType());
+
+        Schema trueFieldSchema = getTrueFieldSchema(avroField.schema());
+        return templatedAvroTypes.contains(trueFieldSchema.getType());
     }
 
     private static boolean isNullable(Schema schema) {
