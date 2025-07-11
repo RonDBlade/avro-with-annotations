@@ -38,11 +38,6 @@ class BasicObjectTest {
         }
 
         @JvmStatic
-        fun classesOfTheSchema(): Set<TypeDescription> {
-            return setOf(schemaClass, schemaBuilderClass)
-        }
-
-        @JvmStatic
         fun primitiveFieldsOfSchema(): Set<String> {
             return setOf("primitive")
         }
@@ -94,7 +89,6 @@ class BasicObjectTest {
             nonExistingAnnotation = NULLABLE_ANNOTATION_TYPE
         )
     }
-
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
     @MethodSource("primitiveFieldsOfSchema")
@@ -321,7 +315,6 @@ class BasicObjectTest {
         )
     }
 
-
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
     @MethodSource("nullablePrimitiveWrapperFieldsOfSchema")
     fun `test nullable primitive field clear method is marked as not nullable in the builder`(fieldName: String) {
@@ -372,7 +365,6 @@ class BasicObjectTest {
             nonExistingAnnotation = NON_NULL_ANNOTATION_TYPE
         )
     }
-
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
     @MethodSource("nonPrimitiveFieldsOfSchema")
@@ -461,7 +453,6 @@ class BasicObjectTest {
         )
     }
 
-
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
     @MethodSource("nonPrimitiveFieldsOfSchema")
     fun `test non primitive field clear method is marked as not nullable in the builder`(fieldName: String) {
@@ -512,7 +503,6 @@ class BasicObjectTest {
             nonExistingAnnotation = NON_NULL_ANNOTATION_TYPE
         )
     }
-
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
     @MethodSource("nullableNonPrimitiveFieldsOfSchema")
