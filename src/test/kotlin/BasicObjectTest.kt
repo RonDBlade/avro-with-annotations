@@ -14,8 +14,8 @@ import org.junit.jupiter.params.provider.MethodSource
 class BasicObjectTest {
 
     companion object {
-        private val SCHEMA_CLASS = "com.example.testsuite.BasicObject"
-        private val SCHEMA_BUILDER_CLASS = "com.example.testsuite.BasicObject\$Builder"
+        private const val SCHEMA_CLASS = "com.example.testsuite.BasicObject"
+        private const val SCHEMA_BUILDER_CLASS = "com.example.testsuite.BasicObject\$Builder"
         private val NON_NULL_ANNOTATION_TYPE = TypeDescription.ForLoadedType(NotNull::class.java)
         private val NULLABLE_ANNOTATION_TYPE = TypeDescription.ForLoadedType(Nullable::class.java)
 
@@ -40,7 +40,7 @@ class BasicObjectTest {
 
         @JvmStatic
         fun classesOfTheSchema(): List<TypeDescription> {
-            return listOf(schemaClass, schemaBuilderClass);
+            return listOf(schemaClass, schemaBuilderClass)
         }
     }
 
