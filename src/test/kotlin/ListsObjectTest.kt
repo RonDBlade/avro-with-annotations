@@ -108,7 +108,6 @@ class ListsObjectTest {
         }
     }
 
-
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
     @MethodSource("nonPrimitiveFieldsOfSchema")
     fun `test non primitive field is marked as not nullable in the schema`(fieldName: String) {
