@@ -44,40 +44,34 @@ class ListsObjectTest {
         fun classesToTest() = setOf(schemaClass, schemaBuilderClass)
 
         @JvmStatic
-        fun nonPrimitiveFieldsOfSchema(): Set<String> {
-            return setOf(
-                "listWithRegularValues",
-                "listWithNullableValues",
-                "listWithRegularListWithRegularValues",
-                "listWithRegularListWithNullableValues",
-                "listWithNullableListWithRegularValues",
-                "listWithNullableListWithNullableValues"
-            )
-        }
+        fun nonPrimitiveFieldsOfSchema() = setOf(
+            "listWithRegularValues",
+            "listWithNullableValues",
+            "listWithRegularListWithRegularValues",
+            "listWithRegularListWithNullableValues",
+            "listWithNullableListWithRegularValues",
+            "listWithNullableListWithNullableValues"
+        )
 
         @JvmStatic
-        fun nullableNonPrimitiveFieldsOfSchema(): Set<String> {
-            return setOf(
-                "nullableListWithRegularValues",
-                "nullableListWithNullableValues",
-                "nullableListWithRegularListWithRegularValues",
-                "nullableListWithRegularListWithNullableValues",
-                "nullableListWithNullableListWithRegularValues",
-                "nullableListWithNullableListWithNullableValues"
-            )
-        }
+        fun nullableNonPrimitiveFieldsOfSchema() = setOf(
+            "nullableListWithRegularValues",
+            "nullableListWithNullableValues",
+            "nullableListWithRegularListWithRegularValues",
+            "nullableListWithRegularListWithNullableValues",
+            "nullableListWithNullableListWithRegularValues",
+            "nullableListWithNullableListWithNullableValues"
+        )
 
         @JvmStatic
-        fun regularFirstLevelTemplate(): Set<String> {
-            return setOf(
-                "listWithRegularValues",
-                "nullableListWithRegularValues",
-                "listWithRegularListWithRegularValues",
-                "nullableListWithRegularListWithRegularValues",
-                "listWithRegularListWithNullableValues",
-                "nullableListWithRegularListWithNullableValues"
-            )
-        }
+        fun regularFirstLevelTemplate() = setOf(
+            "listWithRegularValues",
+            "nullableListWithRegularValues",
+            "listWithRegularListWithRegularValues",
+            "nullableListWithRegularListWithRegularValues",
+            "listWithRegularListWithNullableValues",
+            "nullableListWithRegularListWithNullableValues"
+        )
 
         @JvmStatic
         fun classWithRegularFirstLevelTemplate(): List<Arguments> {
@@ -89,16 +83,14 @@ class ListsObjectTest {
         }
 
         @JvmStatic
-        fun nullableFirstLevelTemplate(): Set<String> {
-            return setOf(
-                "listWithNullableValues",
-                "nullableListWithNullableValues",
-                "listWithNullableListWithRegularValues",
-                "listWithNullableListWithNullableValues",
-                "nullableListWithNullableListWithRegularValues",
-                "nullableListWithNullableListWithNullableValues"
-            )
-        }
+        fun nullableFirstLevelTemplate() = setOf(
+            "listWithNullableValues",
+            "nullableListWithNullableValues",
+            "listWithNullableListWithRegularValues",
+            "listWithNullableListWithNullableValues",
+            "nullableListWithNullableListWithRegularValues",
+            "nullableListWithNullableListWithNullableValues"
+        )
 
         @JvmStatic
         fun classWithNullableFirstLevelTemplate(): List<Arguments> {
@@ -110,14 +102,12 @@ class ListsObjectTest {
         }
 
         @JvmStatic
-        fun regularSecondLevelTemplate(): Set<String> {
-            return setOf(
-                "listWithRegularListWithRegularValues",
-                "nullableListWithRegularListWithRegularValues",
-                "listWithNullableListWithRegularValues",
-                "nullableListWithNullableListWithRegularValues"
-            )
-        }
+        fun regularSecondLevelTemplate() = setOf(
+            "listWithRegularListWithRegularValues",
+            "nullableListWithRegularListWithRegularValues",
+            "listWithNullableListWithRegularValues",
+            "nullableListWithNullableListWithRegularValues"
+        )
 
         @JvmStatic
         fun classWithRegularSecondLevelTemplate(): List<Arguments> {
@@ -129,14 +119,12 @@ class ListsObjectTest {
         }
 
         @JvmStatic
-        fun nullableSecondLevelTemplate(): Set<String> {
-            return setOf(
-                "listWithRegularListWithNullableValues",
-                "nullableListWithRegularListWithNullableValues",
-                "listWithNullableListWithNullableValues",
-                "nullableListWithNullableListWithNullableValues"
-            )
-        }
+        fun nullableSecondLevelTemplate() = setOf(
+            "listWithRegularListWithNullableValues",
+            "nullableListWithRegularListWithNullableValues",
+            "listWithNullableListWithNullableValues",
+            "nullableListWithNullableListWithNullableValues"
+        )
 
         @JvmStatic
         fun classWithNullableSecondLevelTemplate(): List<Arguments> {
