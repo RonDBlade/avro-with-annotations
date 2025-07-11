@@ -39,13 +39,13 @@ class BasicObjectTest {
         }
 
         @JvmStatic
-        fun classes(): List<TypeDescription> {
+        fun classesOfTheSchema(): List<TypeDescription> {
             return listOf(schemaClass, schemaBuilderClass);
         }
     }
 
-    @ParameterizedTest(name = "[{displayName}] - using schema: {0}")
-    @MethodSource("classes")
+    @ParameterizedTest(name = "[{displayName}] - using class: {0}")
+    @MethodSource("classesOfTheSchema")
     fun `test method getPrimitive is marked as not nullable`(classDescription: TypeDescription) {
         val methodDescription: MethodDescription = classDescription.declaredMethods
             .filter(ElementMatchers.named("getPrimitive"))
@@ -60,8 +60,8 @@ class BasicObjectTest {
         )
     }
 
-    @ParameterizedTest(name = "[{displayName}] - using schema: {0}")
-    @MethodSource("classes")
+    @ParameterizedTest(name = "[{displayName}] - using class: {0}")
+    @MethodSource("classesOfTheSchema")
     fun `test field primitive is marked as not nullable`() {
         val fieldDescription = schemaClass.declaredFields
             .filter(ElementMatchers.named("primitive"))
@@ -76,8 +76,8 @@ class BasicObjectTest {
         )
     }
 
-    @ParameterizedTest(name = "[{displayName}] - using schema: {0}")
-    @MethodSource("classes")
+    @ParameterizedTest(name = "[{displayName}] - using class: {0}")
+    @MethodSource("classesOfTheSchema")
     fun `test method parameter of setPrimitive is marked as not nullable`() {
         val methodDescription: MethodDescription = schemaClass.declaredMethods
             .filter(ElementMatchers.named("setPrimitive"))
@@ -93,8 +93,8 @@ class BasicObjectTest {
         )
     }
 
-    @ParameterizedTest(name = "[{displayName}] - using schema: {0}")
-    @MethodSource("classes")
+    @ParameterizedTest(name = "[{displayName}] - using class: {0}")
+    @MethodSource("classesOfTheSchema")
     fun `test method getNullablePrimitive is marked as  Nullable`(classDescription: TypeDescription) {
         val methodDescription: MethodDescription = classDescription.declaredMethods
             .filter(ElementMatchers.named("getNullablePrimitive"))
@@ -109,8 +109,8 @@ class BasicObjectTest {
         )
     }
 
-    @ParameterizedTest(name = "[{displayName}] - using schema: {0}")
-    @MethodSource("classes")
+    @ParameterizedTest(name = "[{displayName}] - using class: {0}")
+    @MethodSource("classesOfTheSchema")
     fun `test field nullablePrimitive is marked as nullable`() {
         val fieldDescription = schemaClass.declaredFields
             .filter(ElementMatchers.named("nullablePrimitive"))
@@ -125,8 +125,8 @@ class BasicObjectTest {
         )
     }
 
-    @ParameterizedTest(name = "[{displayName}] - using schema: {0}")
-    @MethodSource("classes")
+    @ParameterizedTest(name = "[{displayName}] - using class: {0}")
+    @MethodSource("classesOfTheSchema")
     fun `test method parameter of setNullablePrimitive is marked as nullable`() {
         val methodDescription: MethodDescription = schemaClass.declaredMethods
             .filter(ElementMatchers.named("setNullablePrimitive"))
