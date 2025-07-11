@@ -1,5 +1,4 @@
 import net.bytebuddy.description.annotation.AnnotationList
-import net.bytebuddy.description.method.MethodDescription
 import net.bytebuddy.description.type.TypeDescription
 import net.bytebuddy.dynamic.ClassFileLocator
 import net.bytebuddy.matcher.ElementMatchers
@@ -8,6 +7,7 @@ import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.Nullable
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 
@@ -28,7 +28,7 @@ class BasicObjectTest {
         fun setUp() {
             // When running tests via Gradle/Maven, the compiled classes are usually
             // already on the system classpath. We can leverage this directly.
-            val locator: ClassFileLocator = ClassFileLocator.ForClassLoader.ofSystemLoader()
+            val locator = ClassFileLocator.ForClassLoader.ofSystemLoader()
 
             // Create a TypePool to resolve type descriptions from the locator
             val typePool = TypePool.Default.of(locator)
@@ -46,24 +46,8 @@ class BasicObjectTest {
 
     @ParameterizedTest(name = "[{displayName}] - using class: {0}")
     @MethodSource("classesOfTheSchema")
-    fun `test method getPrimitive is marked as not nullable`(classDescription: TypeDescription) {
-        val methodDescription: MethodDescription = classDescription.declaredMethods
-            .filter(ElementMatchers.named("getPrimitive"))
-            .getOnly()
-
-        val annotations = methodDescription.declaredAnnotations
-
-        assertAnnotations(
-            annotations,
-            existingAnnotation = NON_NULL_ANNOTATION_TYPE,
-            nonExistingAnnotation = NULLABLE_ANNOTATION_TYPE
-        )
-    }
-
-    @ParameterizedTest(name = "[{displayName}] - using class: {0}")
-    @MethodSource("classesOfTheSchema")
-    fun `test field primitive is marked as not nullable`() {
-        val fieldDescription = schemaClass.declaredFields
+    fun `test field primitive is marked as not nullable`(classDescription: TypeDescription) {
+        val fieldDescription = classDescription.declaredFields
             .filter(ElementMatchers.named("primitive"))
             .getOnly()
 
@@ -78,8 +62,24 @@ class BasicObjectTest {
 
     @ParameterizedTest(name = "[{displayName}] - using class: {0}")
     @MethodSource("classesOfTheSchema")
-    fun `test method parameter of setPrimitive is marked as not nullable`() {
-        val methodDescription: MethodDescription = schemaClass.declaredMethods
+    fun `test method getPrimitive is marked as not nullable`(classDescription: TypeDescription) {
+        val methodDescription = classDescription.declaredMethods
+            .filter(ElementMatchers.named("getPrimitive"))
+            .getOnly()
+
+        val annotations = methodDescription.declaredAnnotations
+
+        assertAnnotations(
+            annotations,
+            existingAnnotation = NON_NULL_ANNOTATION_TYPE,
+            nonExistingAnnotation = NULLABLE_ANNOTATION_TYPE
+        )
+    }
+
+    @ParameterizedTest(name = "[{displayName}] - using class: {0}")
+    @MethodSource("classesOfTheSchema")
+    fun `test method parameter of setPrimitive is marked as not nullable`(classDescription: TypeDescription) {
+        val methodDescription = classDescription.declaredMethods
             .filter(ElementMatchers.named("setPrimitive"))
             .getOnly()
         val parameter = methodDescription.parameters[0]
@@ -95,24 +95,8 @@ class BasicObjectTest {
 
     @ParameterizedTest(name = "[{displayName}] - using class: {0}")
     @MethodSource("classesOfTheSchema")
-    fun `test method getNullablePrimitive is marked as  Nullable`(classDescription: TypeDescription) {
-        val methodDescription: MethodDescription = classDescription.declaredMethods
-            .filter(ElementMatchers.named("getNullablePrimitive"))
-            .getOnly()
-
-        val annotations = methodDescription.declaredAnnotations
-
-        assertAnnotations(
-            annotations,
-            existingAnnotation = NULLABLE_ANNOTATION_TYPE,
-            nonExistingAnnotation = NON_NULL_ANNOTATION_TYPE
-        )
-    }
-
-    @ParameterizedTest(name = "[{displayName}] - using class: {0}")
-    @MethodSource("classesOfTheSchema")
-    fun `test field nullablePrimitive is marked as nullable`() {
-        val fieldDescription = schemaClass.declaredFields
+    fun `test field nullablePrimitive is marked as nullable`(classDescription: TypeDescription) {
+        val fieldDescription = classDescription.declaredFields
             .filter(ElementMatchers.named("nullablePrimitive"))
             .getOnly()
 
@@ -127,9 +111,151 @@ class BasicObjectTest {
 
     @ParameterizedTest(name = "[{displayName}] - using class: {0}")
     @MethodSource("classesOfTheSchema")
-    fun `test method parameter of setNullablePrimitive is marked as nullable`() {
-        val methodDescription: MethodDescription = schemaClass.declaredMethods
+    fun `test method getNullablePrimitive is marked as  Nullable`(classDescription: TypeDescription) {
+        val methodDescription = classDescription.declaredMethods
+            .filter(ElementMatchers.named("getNullablePrimitive"))
+            .getOnly()
+
+        val annotations = methodDescription.declaredAnnotations
+
+        assertAnnotations(
+            annotations,
+            existingAnnotation = NULLABLE_ANNOTATION_TYPE,
+            nonExistingAnnotation = NON_NULL_ANNOTATION_TYPE
+        )
+    }
+
+    @ParameterizedTest(name = "[{displayName}] - using class: {0}")
+    @MethodSource("classesOfTheSchema")
+    fun `test method parameter of setNullablePrimitive is marked as nullable`(classDescription: TypeDescription) {
+        val methodDescription = classDescription.declaredMethods
             .filter(ElementMatchers.named("setNullablePrimitive"))
+            .getOnly()
+        val parameter = methodDescription.parameters[0]
+
+        val annotations = parameter.declaredAnnotations
+
+        assertAnnotations(
+            annotations,
+            existingAnnotation = NULLABLE_ANNOTATION_TYPE,
+            nonExistingAnnotation = NON_NULL_ANNOTATION_TYPE
+        )
+    }
+
+    @Test
+    fun `test field string in schema is marked as not nullable`() {
+        val fieldDescription = schemaClass.declaredFields
+            .filter(ElementMatchers.named("string"))
+            .getOnly()
+
+        val annotations = fieldDescription.declaredAnnotations
+
+        assertAnnotations(
+            annotations,
+            existingAnnotation = NON_NULL_ANNOTATION_TYPE,
+            nonExistingAnnotation = NULLABLE_ANNOTATION_TYPE
+        )
+    }
+
+    @Test
+    fun `test field string in builder is marked as nullable`() {
+        val fieldDescription = schemaBuilderClass.declaredFields
+            .filter(ElementMatchers.named("string"))
+            .getOnly()
+
+        val annotations = fieldDescription.declaredAnnotations
+
+        assertAnnotations(
+            annotations,
+            existingAnnotation = NULLABLE_ANNOTATION_TYPE,
+            nonExistingAnnotation = NON_NULL_ANNOTATION_TYPE
+        )
+    }
+
+    @Test
+    fun `test method getString in schema is marked as not nullable`() {
+        val methodDescription = schemaClass.declaredMethods
+            .filter(ElementMatchers.named("getString"))
+            .getOnly()
+
+        val annotations = methodDescription.declaredAnnotations
+
+        assertAnnotations(
+            annotations,
+            existingAnnotation = NON_NULL_ANNOTATION_TYPE,
+            nonExistingAnnotation = NULLABLE_ANNOTATION_TYPE
+        )
+    }
+
+    @Test
+    fun `test method getString in builder is marked as not nullable`() {
+        val methodDescription = schemaBuilderClass.declaredMethods
+            .filter(ElementMatchers.named("getString"))
+            .getOnly()
+
+        val annotations = methodDescription.declaredAnnotations
+
+        assertAnnotations(
+            annotations,
+            existingAnnotation = NULLABLE_ANNOTATION_TYPE,
+            nonExistingAnnotation = NON_NULL_ANNOTATION_TYPE
+        )
+    }
+
+    @ParameterizedTest(name = "[{displayName}] - using class: {0}")
+    @MethodSource("classesOfTheSchema")
+    fun `test method parameter of setString is marked as not nullable`(classDescription: TypeDescription) {
+        val methodDescription = classDescription.declaredMethods
+            .filter(ElementMatchers.named("setString"))
+            .getOnly()
+        val parameter = methodDescription.parameters[0]
+
+        val annotations = parameter.declaredAnnotations
+
+        assertAnnotations(
+            annotations,
+            existingAnnotation = NON_NULL_ANNOTATION_TYPE,
+            nonExistingAnnotation = NULLABLE_ANNOTATION_TYPE
+        )
+    }
+
+    @ParameterizedTest(name = "[{displayName}] - using class: {0}")
+    @MethodSource("classesOfTheSchema")
+    fun `test field nullableString is marked as nullable`(classDescription: TypeDescription) {
+        val fieldDescription = classDescription.declaredFields
+            .filter(ElementMatchers.named("nullableString"))
+            .getOnly()
+
+        val annotations = fieldDescription.declaredAnnotations
+
+        assertAnnotations(
+            annotations,
+            existingAnnotation = NULLABLE_ANNOTATION_TYPE,
+            nonExistingAnnotation = NON_NULL_ANNOTATION_TYPE
+        )
+    }
+
+    @ParameterizedTest(name = "[{displayName}] - using class: {0}")
+    @MethodSource("classesOfTheSchema")
+    fun `test method getNullableString is marked as  Nullable`(classDescription: TypeDescription) {
+        val methodDescription = classDescription.declaredMethods
+            .filter(ElementMatchers.named("getNullableString"))
+            .getOnly()
+
+        val annotations = methodDescription.declaredAnnotations
+
+        assertAnnotations(
+            annotations,
+            existingAnnotation = NULLABLE_ANNOTATION_TYPE,
+            nonExistingAnnotation = NON_NULL_ANNOTATION_TYPE
+        )
+    }
+
+    @ParameterizedTest(name = "[{displayName}] - using class: {0}")
+    @MethodSource("classesOfTheSchema")
+    fun `test method parameter of setNullableString is marked as nullable`(classDescription: TypeDescription) {
+        val methodDescription = classDescription.declaredMethods
+            .filter(ElementMatchers.named("setNullableString"))
             .getOnly()
         val parameter = methodDescription.parameters[0]
 
