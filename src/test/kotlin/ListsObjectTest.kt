@@ -44,7 +44,7 @@ class ListsObjectTest {
         fun classesToTest() = setOf(schemaClass, schemaBuilderClass)
 
         @JvmStatic
-        fun nonPrimitiveFieldsOfSchema() = setOf(
+        fun listFieldsOfSchema() = setOf(
             "listWithRegularValues",
             "listWithNullableValues",
             "listWithRegularListWithRegularValues",
@@ -54,7 +54,7 @@ class ListsObjectTest {
         )
 
         @JvmStatic
-        fun nullableNonPrimitiveFieldsOfSchema() = setOf(
+        fun nullableListFieldsOfSchema() = setOf(
             "nullableListWithRegularValues",
             "nullableListWithNullableValues",
             "nullableListWithRegularListWithRegularValues",
@@ -137,8 +137,8 @@ class ListsObjectTest {
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
-    @MethodSource("nonPrimitiveFieldsOfSchema")
-    fun `test non primitive field is marked as not nullable in the schema`(fieldName: String) {
+    @MethodSource("listFieldsOfSchema")
+    fun `test list field is marked as not nullable in the schema`(fieldName: String) {
         val fieldDescription = schemaClass.declaredFields
             .filter(ElementMatchers.named(fieldName))
             .getOnly()
@@ -153,8 +153,8 @@ class ListsObjectTest {
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
-    @MethodSource("nonPrimitiveFieldsOfSchema")
-    fun `test non primitive field is still marked as nullable in the builder`(fieldName: String) {
+    @MethodSource("listFieldsOfSchema")
+    fun `test list field is still marked as nullable in the builder`(fieldName: String) {
         val fieldDescription = schemaBuilderClass.declaredFields
             .filter(ElementMatchers.named(fieldName))
             .getOnly()
@@ -169,8 +169,8 @@ class ListsObjectTest {
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
-    @MethodSource("nonPrimitiveFieldsOfSchema")
-    fun `test non primitive field getter method is marked as not nullable in the schema`(fieldName: String) {
+    @MethodSource("listFieldsOfSchema")
+    fun `test list field getter method is marked as not nullable in the schema`(fieldName: String) {
         val methodName = "get${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
@@ -186,8 +186,8 @@ class ListsObjectTest {
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
-    @MethodSource("nonPrimitiveFieldsOfSchema")
-    fun `test non primitive field getter method is still marked as nullable in the builder`(fieldName: String) {
+    @MethodSource("listFieldsOfSchema")
+    fun `test list field getter method is still marked as nullable in the builder`(fieldName: String) {
         val methodName = "get${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaBuilderClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
@@ -203,8 +203,8 @@ class ListsObjectTest {
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
-    @MethodSource("nonPrimitiveFieldsOfSchema")
-    fun `test non primitive field setter method parameter is marked as not nullable in the schema`(fieldName: String) {
+    @MethodSource("listFieldsOfSchema")
+    fun `test list field setter method parameter is marked as not nullable in the schema`(fieldName: String) {
         val methodName = "set${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
@@ -221,8 +221,8 @@ class ListsObjectTest {
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
-    @MethodSource("nonPrimitiveFieldsOfSchema")
-    fun `test non primitive field setter method parameter is marked as not nullable in the builder`(fieldName: String) {
+    @MethodSource("listFieldsOfSchema")
+    fun `test list field setter method parameter is marked as not nullable in the builder`(fieldName: String) {
         val methodName = "set${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaBuilderClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
@@ -239,8 +239,8 @@ class ListsObjectTest {
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
-    @MethodSource("nonPrimitiveFieldsOfSchema")
-    fun `test non primitive field setter method is marked as not nullable in the builder`(fieldName: String) {
+    @MethodSource("listFieldsOfSchema")
+    fun `test list field setter method is marked as not nullable in the builder`(fieldName: String) {
         val methodName = "set${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaBuilderClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
@@ -256,8 +256,8 @@ class ListsObjectTest {
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
-    @MethodSource("nonPrimitiveFieldsOfSchema")
-    fun `test non primitive field clear method is marked as not nullable in the builder`(fieldName: String) {
+    @MethodSource("listFieldsOfSchema")
+    fun `test list field clear method is marked as not nullable in the builder`(fieldName: String) {
         val methodName = "clear${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaBuilderClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
@@ -275,8 +275,8 @@ class ListsObjectTest {
     /////////////////////////////////////////////////////////////////////////////////////////////
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
-    @MethodSource("nullableNonPrimitiveFieldsOfSchema")
-    fun `test nullable non primitive field is marked as nullable in the schema`(fieldName: String) {
+    @MethodSource("nullableListFieldsOfSchema")
+    fun `test nullable list field is marked as nullable in the schema`(fieldName: String) {
         val fieldDescription = schemaClass.declaredFields
             .filter(ElementMatchers.named(fieldName))
             .getOnly()
@@ -291,8 +291,8 @@ class ListsObjectTest {
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
-    @MethodSource("nullableNonPrimitiveFieldsOfSchema")
-    fun `test nullable non primitive field is marked as nullable in the builder`(fieldName: String) {
+    @MethodSource("nullableListFieldsOfSchema")
+    fun `test nullable list field is marked as nullable in the builder`(fieldName: String) {
         val fieldDescription = schemaBuilderClass.declaredFields
             .filter(ElementMatchers.named(fieldName))
             .getOnly()
@@ -307,8 +307,8 @@ class ListsObjectTest {
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
-    @MethodSource("nullableNonPrimitiveFieldsOfSchema")
-    fun `test nullable non primitive field getter method is marked as nullable in the schema`(fieldName: String) {
+    @MethodSource("nullableListFieldsOfSchema")
+    fun `test nullable list field getter method is marked as nullable in the schema`(fieldName: String) {
         val methodName = "get${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
@@ -324,8 +324,8 @@ class ListsObjectTest {
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
-    @MethodSource("nullableNonPrimitiveFieldsOfSchema")
-    fun `test nullable non primitive field getter method is marked as nullable in the builder`(fieldName: String) {
+    @MethodSource("nullableListFieldsOfSchema")
+    fun `test nullable list field getter method is marked as nullable in the builder`(fieldName: String) {
         val methodName = "get${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaBuilderClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
@@ -341,8 +341,8 @@ class ListsObjectTest {
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
-    @MethodSource("nullableNonPrimitiveFieldsOfSchema")
-    fun `test nullable non primitive field setter method parameter is marked as nullable in the schema`(fieldName: String) {
+    @MethodSource("nullableListFieldsOfSchema")
+    fun `test nullable list field setter method parameter is marked as nullable in the schema`(fieldName: String) {
         val methodName = "set${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
@@ -359,8 +359,8 @@ class ListsObjectTest {
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
-    @MethodSource("nullableNonPrimitiveFieldsOfSchema")
-    fun `test nullable non primitive field setter method parameter is marked as nullable in the builder`(fieldName: String) {
+    @MethodSource("nullableListFieldsOfSchema")
+    fun `test nullable list field setter method parameter is marked as nullable in the builder`(fieldName: String) {
         val methodName = "set${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaBuilderClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
@@ -377,8 +377,8 @@ class ListsObjectTest {
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
-    @MethodSource("nullableNonPrimitiveFieldsOfSchema")
-    fun `test nullable non primitive field setter method is marked as not nullable in the builder`(fieldName: String) {
+    @MethodSource("nullableListFieldsOfSchema")
+    fun `test nullable list field setter method is marked as not nullable in the builder`(fieldName: String) {
         val methodName = "set${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaBuilderClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
@@ -394,8 +394,8 @@ class ListsObjectTest {
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
-    @MethodSource("nullableNonPrimitiveFieldsOfSchema")
-    fun `test nullable non primitive field clear method is marked as not nullable in the builder`(fieldName: String) {
+    @MethodSource("nullableListFieldsOfSchema")
+    fun `test nullable list field clear method is marked as not nullable in the builder`(fieldName: String) {
         val methodName = "clear${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaBuilderClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
