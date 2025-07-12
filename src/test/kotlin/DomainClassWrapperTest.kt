@@ -38,14 +38,11 @@ class DomainClassWrapperTest {
             schemaClass = typePool.describe(SCHEMA_CLASS).resolve()
             schemaBuilderClass = typePool.describe(SCHEMA_BUILDER_CLASS).resolve()
         }
-
-        @JvmStatic
-        fun recordFields() = setOf("domainClass", "nullableDomainClass")
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
-    @ValueSource(strings = ["independentEnum"])
-    fun `test non primitive field is marked as not nullable in the schema`(fieldName: String) {
+    @ValueSource(strings = ["independentEnum", "domainClass"])
+    fun `test schema generated field is marked as not nullable in the schema`(fieldName: String) {
         val fieldDescription = schemaClass.declaredFields
             .filter(ElementMatchers.named(fieldName))
             .getOnly()
@@ -60,8 +57,8 @@ class DomainClassWrapperTest {
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
-    @ValueSource(strings = ["independentEnum"])
-    fun `test non primitive field is still marked as nullable in the builder`(fieldName: String) {
+    @ValueSource(strings = ["independentEnum", "domainClass"])
+    fun `test schema generated field is still marked as nullable in the builder`(fieldName: String) {
         val fieldDescription = schemaBuilderClass.declaredFields
             .filter(ElementMatchers.named(fieldName))
             .getOnly()
@@ -76,8 +73,8 @@ class DomainClassWrapperTest {
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
-    @ValueSource(strings = ["independentEnum"])
-    fun `test non primitive field getter method is marked as not nullable in the schema`(fieldName: String) {
+    @ValueSource(strings = ["independentEnum", "domainClass"])
+    fun `test schema generated field getter method is marked as not nullable in the schema`(fieldName: String) {
         val methodName = "get${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
@@ -93,8 +90,8 @@ class DomainClassWrapperTest {
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
-    @ValueSource(strings = ["independentEnum"])
-    fun `test non primitive field getter method is still marked as nullable in the builder`(fieldName: String) {
+    @ValueSource(strings = ["independentEnum", "domainClass"])
+    fun `test schema generated field getter method is still marked as nullable in the builder`(fieldName: String) {
         val methodName = "get${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaBuilderClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
@@ -110,8 +107,8 @@ class DomainClassWrapperTest {
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
-    @ValueSource(strings = ["independentEnum"])
-    fun `test non primitive field setter method parameter is marked as not nullable in the schema`(fieldName: String) {
+    @ValueSource(strings = ["independentEnum", "domainClass"])
+    fun `test schema generated field setter method parameter is marked as not nullable in the schema`(fieldName: String) {
         val methodName = "set${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
@@ -128,8 +125,8 @@ class DomainClassWrapperTest {
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
-    @ValueSource(strings = ["independentEnum"])
-    fun `test non primitive field setter method parameter is marked as not nullable in the builder`(fieldName: String) {
+    @ValueSource(strings = ["independentEnum", "domainClass"])
+    fun `test schema generated field setter method parameter is marked as not nullable in the builder`(fieldName: String) {
         val methodName = "set${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaBuilderClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
@@ -146,8 +143,8 @@ class DomainClassWrapperTest {
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
-    @ValueSource(strings = ["independentEnum"])
-    fun `test non primitive field setter method is marked as not nullable in the builder`(fieldName: String) {
+    @ValueSource(strings = ["independentEnum", "domainClass"])
+    fun `test schema generated field setter method is marked as not nullable in the builder`(fieldName: String) {
         val methodName = "set${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaBuilderClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
@@ -163,8 +160,8 @@ class DomainClassWrapperTest {
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
-    @ValueSource(strings = ["independentEnum"])
-    fun `test non primitive field clear method is marked as not nullable in the builder`(fieldName: String) {
+    @ValueSource(strings = ["independentEnum", "domainClass"])
+    fun `test schema generated field clear method is marked as not nullable in the builder`(fieldName: String) {
         val methodName = "clear${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaBuilderClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
@@ -182,8 +179,8 @@ class DomainClassWrapperTest {
     /////////////////////////////////////////////////////////////////////////////////////////////
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
-    @ValueSource(strings = ["nullableIndependentEnum"])
-    fun `test nullable non primitive field is marked as nullable in the schema`(fieldName: String) {
+    @ValueSource(strings = ["nullableIndependentEnum", "nullableDomainClass"])
+    fun `test nullable schema generated field is marked as nullable in the schema`(fieldName: String) {
         val fieldDescription = schemaClass.declaredFields
             .filter(ElementMatchers.named(fieldName))
             .getOnly()
@@ -198,8 +195,8 @@ class DomainClassWrapperTest {
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
-    @ValueSource(strings = ["nullableIndependentEnum"])
-    fun `test nullable non primitive field is marked as nullable in the builder`(fieldName: String) {
+    @ValueSource(strings = ["nullableIndependentEnum", "nullableDomainClass"])
+    fun `test nullable schema generated field is marked as nullable in the builder`(fieldName: String) {
         val fieldDescription = schemaBuilderClass.declaredFields
             .filter(ElementMatchers.named(fieldName))
             .getOnly()
@@ -214,8 +211,8 @@ class DomainClassWrapperTest {
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
-    @ValueSource(strings = ["nullableIndependentEnum"])
-    fun `test nullable non primitive field getter method is marked as nullable in the schema`(fieldName: String) {
+    @ValueSource(strings = ["nullableIndependentEnum", "nullableDomainClass"])
+    fun `test nullable schema generated field getter method is marked as nullable in the schema`(fieldName: String) {
         val methodName = "get${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
@@ -231,8 +228,8 @@ class DomainClassWrapperTest {
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
-    @ValueSource(strings = ["nullableIndependentEnum"])
-    fun `test nullable non primitive field getter method is marked as nullable in the builder`(fieldName: String) {
+    @ValueSource(strings = ["nullableIndependentEnum", "nullableDomainClass"])
+    fun `test nullable schema generated field getter method is marked as nullable in the builder`(fieldName: String) {
         val methodName = "get${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaBuilderClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
@@ -248,8 +245,8 @@ class DomainClassWrapperTest {
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
-    @ValueSource(strings = ["nullableIndependentEnum"])
-    fun `test nullable non primitive field setter method parameter is marked as nullable in the schema`(fieldName: String) {
+    @ValueSource(strings = ["nullableIndependentEnum", "nullableDomainClass"])
+    fun `test nullable schema generated field setter method parameter is marked as nullable in the schema`(fieldName: String) {
         val methodName = "set${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
@@ -266,8 +263,8 @@ class DomainClassWrapperTest {
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
-    @ValueSource(strings = ["nullableIndependentEnum"])
-    fun `test nullable non primitive field setter method parameter is marked as nullable in the builder`(fieldName: String) {
+    @ValueSource(strings = ["nullableIndependentEnum", "nullableDomainClass"])
+    fun `test nullable schema generated field setter method parameter is marked as nullable in the builder`(fieldName: String) {
         val methodName = "set${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaBuilderClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
@@ -284,8 +281,8 @@ class DomainClassWrapperTest {
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
-    @ValueSource(strings = ["nullableIndependentEnum"])
-    fun `test nullable non primitive field setter method is marked as not nullable in the builder`(fieldName: String) {
+    @ValueSource(strings = ["nullableIndependentEnum", "nullableDomainClass"])
+    fun `test nullable schema generated field setter method is marked as not nullable in the builder`(fieldName: String) {
         val methodName = "set${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaBuilderClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
@@ -301,8 +298,95 @@ class DomainClassWrapperTest {
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
-    @ValueSource(strings = ["nullableIndependentEnum"])
-    fun `test nullable non primitive field clear method is marked as not nullable in the builder`(fieldName: String) {
+    @ValueSource(strings = ["nullableIndependentEnum", "nullableDomainClass"])
+    fun `test nullable schema generated field clear method is marked as not nullable in the builder`(fieldName: String) {
+        val methodName = "clear${fieldName[0].uppercase() + fieldName.substring(1)}"
+        val methodDescription = schemaBuilderClass.declaredMethods
+            .filter(ElementMatchers.named(methodName))
+            .getOnly()
+
+        val annotations = methodDescription.declaredAnnotations
+
+        assertAnnotations(
+            annotations,
+            existingAnnotation = NON_NULL_ANNOTATION_TYPE,
+            nonExistingAnnotation = NULLABLE_ANNOTATION_TYPE
+        )
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    @ParameterizedTest(name = "[{displayName}] - for field: {0}")
+    @ValueSource(strings = ["domainClass", "nullableDomainClass"])
+    fun `test record builder field is marked as nullable in the builder`(fieldName: String) {
+        val fieldDescription = schemaBuilderClass.declaredFields
+            .filter(ElementMatchers.named(fieldName))
+            .getOnly()
+
+        val annotations = fieldDescription.declaredAnnotations
+
+        assertAnnotations(
+            annotations,
+            existingAnnotation = NULLABLE_ANNOTATION_TYPE,
+            nonExistingAnnotation = NON_NULL_ANNOTATION_TYPE
+        )
+    }
+
+    @ParameterizedTest(name = "[{displayName}] - for field: {0}")
+    @ValueSource(strings = ["nullableIndependentEnum", "nullableDomainClass"])
+    fun `test record builder field getter method is marked as nullable in the builder`(fieldName: String) {
+        val methodName = "get${fieldName[0].uppercase() + fieldName.substring(1)}"
+        val methodDescription = schemaBuilderClass.declaredMethods
+            .filter(ElementMatchers.named(methodName))
+            .getOnly()
+
+        val annotations = methodDescription.declaredAnnotations
+
+        assertAnnotations(
+            annotations,
+            existingAnnotation = NULLABLE_ANNOTATION_TYPE,
+            nonExistingAnnotation = NON_NULL_ANNOTATION_TYPE
+        )
+    }
+
+    @ParameterizedTest(name = "[{displayName}] - for field: {0}")
+    @ValueSource(strings = ["nullableIndependentEnum", "nullableDomainClass"])
+    fun `test record builder field setter method parameter is marked as nullable in the builder`(fieldName: String) {
+        val methodName = "set${fieldName[0].uppercase() + fieldName.substring(1)}"
+        val methodDescription = schemaBuilderClass.declaredMethods
+            .filter(ElementMatchers.named(methodName))
+            .getOnly()
+        val parameter = methodDescription.parameters[0]
+
+        val annotations = parameter.declaredAnnotations
+
+        assertAnnotations(
+            annotations,
+            existingAnnotation = NULLABLE_ANNOTATION_TYPE,
+            nonExistingAnnotation = NON_NULL_ANNOTATION_TYPE
+        )
+    }
+
+    @ParameterizedTest(name = "[{displayName}] - for field: {0}")
+    @ValueSource(strings = ["nullableIndependentEnum", "nullableDomainClass"])
+    fun `test record builder field setter method is marked as not nullable in the builder`(fieldName: String) {
+        val methodName = "set${fieldName[0].uppercase() + fieldName.substring(1)}"
+        val methodDescription = schemaBuilderClass.declaredMethods
+            .filter(ElementMatchers.named(methodName))
+            .getOnly()
+
+        val annotations = methodDescription.declaredAnnotations
+
+        assertAnnotations(
+            annotations,
+            existingAnnotation = NON_NULL_ANNOTATION_TYPE,
+            nonExistingAnnotation = NULLABLE_ANNOTATION_TYPE
+        )
+    }
+
+    @ParameterizedTest(name = "[{displayName}] - for field: {0}")
+    @ValueSource(strings = ["nullableIndependentEnum", "nullableDomainClass"])
+    fun `test record builder field clear method is marked as not nullable in the builder`(fieldName: String) {
         val methodName = "clear${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaBuilderClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
