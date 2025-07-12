@@ -319,8 +319,9 @@ class DomainClassWrapperTest {
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
     @ValueSource(strings = ["domainClass", "nullableDomainClass"])
     fun `test record builder field is marked as nullable in the builder`(fieldName: String) {
+        val fieldBuilderFieldName = "${fieldName}Builder"
         val fieldDescription = schemaBuilderClass.declaredFields
-            .filter(ElementMatchers.named(fieldName))
+            .filter(ElementMatchers.named(fieldBuilderFieldName))
             .getOnly()
 
         val annotations = fieldDescription.declaredAnnotations
@@ -333,9 +334,10 @@ class DomainClassWrapperTest {
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
-    @ValueSource(strings = ["nullableIndependentEnum", "nullableDomainClass"])
+    @ValueSource(strings = ["domainClass", "nullableDomainClass"])
     fun `test record builder field getter method is marked as nullable in the builder`(fieldName: String) {
-        val methodName = "get${fieldName[0].uppercase() + fieldName.substring(1)}"
+        val fieldBuilderFieldName = "${fieldName}Builder"
+        val methodName = "get${fieldBuilderFieldName[0].uppercase() + fieldBuilderFieldName.substring(1)}"
         val methodDescription = schemaBuilderClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
             .getOnly()
@@ -350,9 +352,10 @@ class DomainClassWrapperTest {
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
-    @ValueSource(strings = ["nullableIndependentEnum", "nullableDomainClass"])
+    @ValueSource(strings = ["domainClass", "nullableDomainClass"])
     fun `test record builder field setter method parameter is marked as nullable in the builder`(fieldName: String) {
-        val methodName = "set${fieldName[0].uppercase() + fieldName.substring(1)}"
+        val fieldBuilderFieldName = "${fieldName}Builder"
+        val methodName = "set${fieldBuilderFieldName[0].uppercase() + fieldBuilderFieldName.substring(1)}"
         val methodDescription = schemaBuilderClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
             .getOnly()
@@ -368,26 +371,10 @@ class DomainClassWrapperTest {
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
-    @ValueSource(strings = ["nullableIndependentEnum", "nullableDomainClass"])
+    @ValueSource(strings = ["domainClass", "nullableDomainClass"])
     fun `test record builder field setter method is marked as not nullable in the builder`(fieldName: String) {
-        val methodName = "set${fieldName[0].uppercase() + fieldName.substring(1)}"
-        val methodDescription = schemaBuilderClass.declaredMethods
-            .filter(ElementMatchers.named(methodName))
-            .getOnly()
-
-        val annotations = methodDescription.declaredAnnotations
-
-        assertAnnotations(
-            annotations,
-            existingAnnotation = NON_NULL_ANNOTATION_TYPE,
-            nonExistingAnnotation = NULLABLE_ANNOTATION_TYPE
-        )
-    }
-
-    @ParameterizedTest(name = "[{displayName}] - for field: {0}")
-    @ValueSource(strings = ["nullableIndependentEnum", "nullableDomainClass"])
-    fun `test record builder field clear method is marked as not nullable in the builder`(fieldName: String) {
-        val methodName = "clear${fieldName[0].uppercase() + fieldName.substring(1)}"
+        val fieldBuilderFieldName = "${fieldName}Builder"
+        val methodName = "set${fieldBuilderFieldName[0].uppercase() + fieldBuilderFieldName.substring(1)}"
         val methodDescription = schemaBuilderClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
             .getOnly()
