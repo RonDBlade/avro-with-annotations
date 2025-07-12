@@ -482,14 +482,15 @@ class MapsObjectTest {
                 assertForValueTemplate(
                     source,
                     existingAnnotation = existingAnnotation,
-                    nonExistingAnnotation = nonExistingAnnotation)
+                    nonExistingAnnotation = nonExistingAnnotation
+                )
             }
         )
     }
 
     fun assertForKeyTemplate(
         source: TypeDescription.Generic
-        ) {
+    ) {
         val keyTemplateAnnotations = source.typeArguments[0].declaredAnnotations
 
         assertAll(
@@ -498,7 +499,8 @@ class MapsObjectTest {
                 assertAnnotations(
                     keyTemplateAnnotations,
                     existingAnnotation = NON_NULL_ANNOTATION_TYPE,
-                    nonExistingAnnotation = NULLABLE_ANNOTATION_TYPE)
+                    nonExistingAnnotation = NULLABLE_ANNOTATION_TYPE
+                )
             })
 
     }
@@ -516,14 +518,16 @@ class MapsObjectTest {
                 assertAnnotations(
                     valueTemplateAnnotations,
                     existingAnnotation = existingAnnotation,
-                    nonExistingAnnotation = nonExistingAnnotation)
+                    nonExistingAnnotation = nonExistingAnnotation
+                )
             })
     }
 
     fun assertAnnotations(
         source: AnnotationList,
         existingAnnotation: TypeDescription,
-        nonExistingAnnotation: TypeDescription) {
+        nonExistingAnnotation: TypeDescription
+    ) {
         assertAll(
             {
                 assertTrue(source.isAnnotationPresent(existingAnnotation)) { "${existingAnnotation.name} should be present" }
