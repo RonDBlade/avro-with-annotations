@@ -120,7 +120,7 @@ class BasicObjectTest {
     fun `test primitive field is marked as not nullable in the schema`(fieldName: String) {
         val fieldDescription = schemaClass.declaredFields
             .filter(ElementMatchers.named(fieldName))
-            .getOnly()
+            .only
 
         val annotations = fieldDescription.declaredAnnotations
 
@@ -136,7 +136,7 @@ class BasicObjectTest {
     fun `test primitive field is marked as not nullable in the builder`(fieldName: String) {
         val fieldDescription = schemaBuilderClass.declaredFields
             .filter(ElementMatchers.named(fieldName))
-            .getOnly()
+            .only
 
         val annotations = fieldDescription.declaredAnnotations
 
@@ -153,7 +153,7 @@ class BasicObjectTest {
         val methodName = "get${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
-            .getOnly()
+            .only
 
         val annotations = methodDescription.declaredAnnotations
 
@@ -170,7 +170,7 @@ class BasicObjectTest {
         val methodName = "get${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaBuilderClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
-            .getOnly()
+            .only
 
         val annotations = methodDescription.declaredAnnotations
 
@@ -187,7 +187,7 @@ class BasicObjectTest {
         val methodName = "set${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
-            .getOnly()
+            .only
         val parameter = methodDescription.parameters[0]
 
         val annotations = parameter.declaredAnnotations
@@ -205,7 +205,7 @@ class BasicObjectTest {
         val methodName = "set${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaBuilderClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
-            .getOnly()
+            .only
         val parameter = methodDescription.parameters[0]
 
         val annotations = parameter.declaredAnnotations
@@ -223,7 +223,7 @@ class BasicObjectTest {
         val methodName = "set${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaBuilderClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
-            .getOnly()
+            .only
 
         val annotations = methodDescription.declaredAnnotations
 
@@ -240,7 +240,7 @@ class BasicObjectTest {
         val methodName = "clear${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaBuilderClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
-            .getOnly()
+            .only
 
         val annotations = methodDescription.declaredAnnotations
 
@@ -258,7 +258,7 @@ class BasicObjectTest {
     fun `test nullable primitive field is marked as nullable in the schema`(fieldName: String) {
         val fieldDescription = schemaClass.declaredFields
             .filter(ElementMatchers.named(fieldName))
-            .getOnly()
+            .only
 
         val annotations = fieldDescription.declaredAnnotations
 
@@ -274,7 +274,7 @@ class BasicObjectTest {
     fun `test nullable primitive field is marked as nullable in the builder`(fieldName: String) {
         val fieldDescription = schemaBuilderClass.declaredFields
             .filter(ElementMatchers.named(fieldName))
-            .getOnly()
+            .only
 
         val annotations = fieldDescription.declaredAnnotations
 
@@ -291,7 +291,7 @@ class BasicObjectTest {
         val methodName = "get${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
-            .getOnly()
+            .only
 
         val annotations = methodDescription.declaredAnnotations
 
@@ -308,7 +308,7 @@ class BasicObjectTest {
         val methodName = "get${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaBuilderClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
-            .getOnly()
+            .only
 
         val annotations = methodDescription.declaredAnnotations
 
@@ -325,7 +325,7 @@ class BasicObjectTest {
         val methodName = "set${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
-            .getOnly()
+            .only
         val parameter = methodDescription.parameters[0]
 
         val annotations = parameter.declaredAnnotations
@@ -343,7 +343,7 @@ class BasicObjectTest {
         val methodName = "set${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaBuilderClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
-            .getOnly()
+            .only
         val parameter = methodDescription.parameters[0]
 
         val annotations = parameter.declaredAnnotations
@@ -361,7 +361,7 @@ class BasicObjectTest {
         val methodName = "set${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaBuilderClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
-            .getOnly()
+            .only
 
         val annotations = methodDescription.declaredAnnotations
 
@@ -378,7 +378,7 @@ class BasicObjectTest {
         val methodName = "clear${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaBuilderClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
-            .getOnly()
+            .only
 
         val annotations = methodDescription.declaredAnnotations
 
@@ -396,7 +396,7 @@ class BasicObjectTest {
     fun `test non primitive field is marked as not nullable in the schema`(fieldName: String) {
         val fieldDescription = schemaClass.declaredFields
             .filter(ElementMatchers.named(fieldName))
-            .getOnly()
+            .only
 
         val annotations = fieldDescription.declaredAnnotations
 
@@ -412,7 +412,7 @@ class BasicObjectTest {
     fun `test non primitive field is still marked as nullable in the builder`(fieldName: String) {
         val fieldDescription = schemaBuilderClass.declaredFields
             .filter(ElementMatchers.named(fieldName))
-            .getOnly()
+            .only
 
         val annotations = fieldDescription.declaredAnnotations
 
@@ -429,7 +429,7 @@ class BasicObjectTest {
         val methodName = "get${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
-            .getOnly()
+            .only
 
         val annotations = methodDescription.declaredAnnotations
 
@@ -446,7 +446,7 @@ class BasicObjectTest {
         val methodName = "get${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaBuilderClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
-            .getOnly()
+            .only
 
         val annotations = methodDescription.declaredAnnotations
 
@@ -463,7 +463,7 @@ class BasicObjectTest {
         val methodName = "set${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
-            .getOnly()
+            .only
         val parameter = methodDescription.parameters[0]
 
         val annotations = parameter.declaredAnnotations
@@ -481,7 +481,7 @@ class BasicObjectTest {
         val methodName = "set${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaBuilderClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
-            .getOnly()
+            .only
         val parameter = methodDescription.parameters[0]
 
         val annotations = parameter.declaredAnnotations
@@ -499,7 +499,7 @@ class BasicObjectTest {
         val methodName = "set${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaBuilderClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
-            .getOnly()
+            .only
 
         val annotations = methodDescription.declaredAnnotations
 
@@ -516,7 +516,7 @@ class BasicObjectTest {
         val methodName = "clear${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaBuilderClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
-            .getOnly()
+            .only
 
         val annotations = methodDescription.declaredAnnotations
 
@@ -534,7 +534,7 @@ class BasicObjectTest {
     fun `test nullable non primitive field is marked as nullable in the schema`(fieldName: String) {
         val fieldDescription = schemaClass.declaredFields
             .filter(ElementMatchers.named(fieldName))
-            .getOnly()
+            .only
 
         val annotations = fieldDescription.declaredAnnotations
 
@@ -550,7 +550,7 @@ class BasicObjectTest {
     fun `test nullable non primitive field is marked as nullable in the builder`(fieldName: String) {
         val fieldDescription = schemaBuilderClass.declaredFields
             .filter(ElementMatchers.named(fieldName))
-            .getOnly()
+            .only
 
         val annotations = fieldDescription.declaredAnnotations
 
@@ -567,7 +567,7 @@ class BasicObjectTest {
         val methodName = "get${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
-            .getOnly()
+            .only
 
         val annotations = methodDescription.declaredAnnotations
 
@@ -584,7 +584,7 @@ class BasicObjectTest {
         val methodName = "get${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaBuilderClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
-            .getOnly()
+            .only
 
         val annotations = methodDescription.declaredAnnotations
 
@@ -601,7 +601,7 @@ class BasicObjectTest {
         val methodName = "set${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
-            .getOnly()
+            .only
         val parameter = methodDescription.parameters[0]
 
         val annotations = parameter.declaredAnnotations
@@ -619,7 +619,7 @@ class BasicObjectTest {
         val methodName = "set${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaBuilderClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
-            .getOnly()
+            .only
         val parameter = methodDescription.parameters[0]
 
         val annotations = parameter.declaredAnnotations
@@ -637,7 +637,7 @@ class BasicObjectTest {
         val methodName = "set${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaBuilderClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
-            .getOnly()
+            .only
 
         val annotations = methodDescription.declaredAnnotations
 
@@ -654,7 +654,7 @@ class BasicObjectTest {
         val methodName = "clear${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaBuilderClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
-            .getOnly()
+            .only
 
         val annotations = methodDescription.declaredAnnotations
 

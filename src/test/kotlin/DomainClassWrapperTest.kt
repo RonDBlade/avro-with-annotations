@@ -1,3 +1,4 @@
+import com.example.testsuite.DomainClassWrapper
 import net.bytebuddy.description.annotation.AnnotationList
 import net.bytebuddy.description.type.TypeDescription
 import net.bytebuddy.dynamic.ClassFileLocator
@@ -9,6 +10,9 @@ import org.junit.jupiter.api.Assertions.assertAll
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.DynamicTest
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestFactory
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 
@@ -40,12 +44,72 @@ class DomainClassWrapperTest {
         }
     }
 
+    @TestFactory
+    fun `test newBuilder methods are marked not nullable`(): List<DynamicTest> {
+        val newBuilderMethodsDescription = schemaClass.declaredMethods
+            .filter(ElementMatchers.named("newBuilder"))
+
+        return newBuilderMethodsDescription.map {
+            val annotations = it.declaredAnnotations
+
+            DynamicTest.dynamicTest(
+                "newBuilder method with parameter ${it.parameters} should be nullable"
+            ) {
+                assertAnnotations(
+                    annotations,
+                    existingAnnotation = NON_NULL_ANNOTATION_TYPE,
+                    nonExistingAnnotation = NULLABLE_ANNOTATION_TYPE
+                )
+            }
+        }.toList()
+    }
+
+    @TestFactory
+    fun `test newBuilder methods parameter is marked nullable`(): List<DynamicTest> {
+        val copyBuilderMethodsDescription = schemaClass.declaredMethods
+            .filter(ElementMatchers.named("newBuilder"))
+            .filter(ElementMatchers.takesArguments(1))
+
+        return copyBuilderMethodsDescription.map {
+            val parameter = it.parameters[0]
+            val annotations = parameter.declaredAnnotations
+
+            DynamicTest.dynamicTest(
+                "newBuilder method with parameter ${it.parameters} should be nullable"
+            ) {
+                assertAnnotations(
+                    annotations,
+                    existingAnnotation = NULLABLE_ANNOTATION_TYPE,
+                    nonExistingAnnotation = NON_NULL_ANNOTATION_TYPE
+                )
+            }
+        }.toList()
+    }
+
+    @Test
+    fun `test that the build method of the builder is marked as not nullable`() {
+        val buildMethodDescription = schemaBuilderClass.declaredMethods
+            .filter(ElementMatchers.named("build"))
+            .filter(ElementMatchers.returns(TypeDescription.ForLoadedType(DomainClassWrapper::class.java)))
+            .only
+
+        val annotations = buildMethodDescription.declaredAnnotations
+
+        assertAnnotations(
+            annotations,
+            existingAnnotation = NON_NULL_ANNOTATION_TYPE,
+            nonExistingAnnotation = NULLABLE_ANNOTATION_TYPE
+        )
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////
+
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
     @ValueSource(strings = ["independentEnum", "domainClass"])
     fun `test schema generated field is marked as not nullable in the schema`(fieldName: String) {
         val fieldDescription = schemaClass.declaredFields
             .filter(ElementMatchers.named(fieldName))
-            .getOnly()
+            .only
 
         val annotations = fieldDescription.declaredAnnotations
 
@@ -61,7 +125,7 @@ class DomainClassWrapperTest {
     fun `test schema generated field is still marked as nullable in the builder`(fieldName: String) {
         val fieldDescription = schemaBuilderClass.declaredFields
             .filter(ElementMatchers.named(fieldName))
-            .getOnly()
+            .only
 
         val annotations = fieldDescription.declaredAnnotations
 
@@ -78,7 +142,7 @@ class DomainClassWrapperTest {
         val methodName = "get${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
-            .getOnly()
+            .only
 
         val annotations = methodDescription.declaredAnnotations
 
@@ -95,7 +159,7 @@ class DomainClassWrapperTest {
         val methodName = "get${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaBuilderClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
-            .getOnly()
+            .only
 
         val annotations = methodDescription.declaredAnnotations
 
@@ -112,7 +176,7 @@ class DomainClassWrapperTest {
         val methodName = "set${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
-            .getOnly()
+            .only
         val parameter = methodDescription.parameters[0]
 
         val annotations = parameter.declaredAnnotations
@@ -130,7 +194,7 @@ class DomainClassWrapperTest {
         val methodName = "set${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaBuilderClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
-            .getOnly()
+            .only
         val parameter = methodDescription.parameters[0]
 
         val annotations = parameter.declaredAnnotations
@@ -148,7 +212,7 @@ class DomainClassWrapperTest {
         val methodName = "set${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaBuilderClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
-            .getOnly()
+            .only
 
         val annotations = methodDescription.declaredAnnotations
 
@@ -165,7 +229,7 @@ class DomainClassWrapperTest {
         val methodName = "clear${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaBuilderClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
-            .getOnly()
+            .only
 
         val annotations = methodDescription.declaredAnnotations
 
@@ -183,7 +247,7 @@ class DomainClassWrapperTest {
     fun `test nullable schema generated field is marked as nullable in the schema`(fieldName: String) {
         val fieldDescription = schemaClass.declaredFields
             .filter(ElementMatchers.named(fieldName))
-            .getOnly()
+            .only
 
         val annotations = fieldDescription.declaredAnnotations
 
@@ -199,7 +263,7 @@ class DomainClassWrapperTest {
     fun `test nullable schema generated field is marked as nullable in the builder`(fieldName: String) {
         val fieldDescription = schemaBuilderClass.declaredFields
             .filter(ElementMatchers.named(fieldName))
-            .getOnly()
+            .only
 
         val annotations = fieldDescription.declaredAnnotations
 
@@ -216,7 +280,7 @@ class DomainClassWrapperTest {
         val methodName = "get${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
-            .getOnly()
+            .only
 
         val annotations = methodDescription.declaredAnnotations
 
@@ -233,7 +297,7 @@ class DomainClassWrapperTest {
         val methodName = "get${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaBuilderClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
-            .getOnly()
+            .only
 
         val annotations = methodDescription.declaredAnnotations
 
@@ -250,7 +314,7 @@ class DomainClassWrapperTest {
         val methodName = "set${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
-            .getOnly()
+            .only
         val parameter = methodDescription.parameters[0]
 
         val annotations = parameter.declaredAnnotations
@@ -268,7 +332,7 @@ class DomainClassWrapperTest {
         val methodName = "set${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaBuilderClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
-            .getOnly()
+            .only
         val parameter = methodDescription.parameters[0]
 
         val annotations = parameter.declaredAnnotations
@@ -286,7 +350,7 @@ class DomainClassWrapperTest {
         val methodName = "set${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaBuilderClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
-            .getOnly()
+            .only
 
         val annotations = methodDescription.declaredAnnotations
 
@@ -303,7 +367,7 @@ class DomainClassWrapperTest {
         val methodName = "clear${fieldName[0].uppercase() + fieldName.substring(1)}"
         val methodDescription = schemaBuilderClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
-            .getOnly()
+            .only
 
         val annotations = methodDescription.declaredAnnotations
 
@@ -322,7 +386,7 @@ class DomainClassWrapperTest {
         val fieldBuilderFieldName = "${fieldName}Builder"
         val fieldDescription = schemaBuilderClass.declaredFields
             .filter(ElementMatchers.named(fieldBuilderFieldName))
-            .getOnly()
+            .only
 
         val annotations = fieldDescription.declaredAnnotations
 
@@ -340,7 +404,7 @@ class DomainClassWrapperTest {
         val methodName = "get${fieldBuilderFieldName[0].uppercase() + fieldBuilderFieldName.substring(1)}"
         val methodDescription = schemaBuilderClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
-            .getOnly()
+            .only
 
         val annotations = methodDescription.declaredAnnotations
 
@@ -358,7 +422,7 @@ class DomainClassWrapperTest {
         val methodName = "set${fieldBuilderFieldName[0].uppercase() + fieldBuilderFieldName.substring(1)}"
         val methodDescription = schemaBuilderClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
-            .getOnly()
+            .only
         val parameter = methodDescription.parameters[0]
 
         val annotations = parameter.declaredAnnotations
@@ -377,7 +441,7 @@ class DomainClassWrapperTest {
         val methodName = "set${fieldBuilderFieldName[0].uppercase() + fieldBuilderFieldName.substring(1)}"
         val methodDescription = schemaBuilderClass.declaredMethods
             .filter(ElementMatchers.named(methodName))
-            .getOnly()
+            .only
 
         val annotations = methodDescription.declaredAnnotations
 
