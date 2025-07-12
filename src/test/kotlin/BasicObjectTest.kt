@@ -11,6 +11,7 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
+import org.junit.jupiter.api.TestInfo
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 
@@ -56,7 +57,7 @@ class BasicObjectTest {
     }
 
     @TestFactory
-    fun `test newBuilder methods are marked not nullable`(): List<DynamicTest> {
+    fun `test newBuilder methods are marked not nullable`(testInfo: TestInfo): List<DynamicTest> {
         val newBuilderMethodsDescription = schemaClass.declaredMethods
             .filter(ElementMatchers.named("newBuilder"))
 
@@ -64,7 +65,7 @@ class BasicObjectTest {
             val annotations = it.declaredAnnotations
 
             DynamicTest.dynamicTest(
-                "newBuilder method with parameter ${it.parameters} should be nullable"
+                "[${testInfo.displayName}] - method with the parameter ${it.parameters}"
             ) {
                 assertAnnotations(
                     annotations,
@@ -76,7 +77,7 @@ class BasicObjectTest {
     }
 
     @TestFactory
-    fun `test newBuilder methods parameter is marked nullable`(): List<DynamicTest> {
+    fun `test newBuilder methods parameter is marked nullable`(testInfo: TestInfo): List<DynamicTest> {
         val copyBuilderMethodsDescription = schemaClass.declaredMethods
             .filter(ElementMatchers.named("newBuilder"))
             .filter(ElementMatchers.takesArguments(1))
@@ -86,7 +87,7 @@ class BasicObjectTest {
             val annotations = parameter.declaredAnnotations
 
             DynamicTest.dynamicTest(
-                "newBuilder method with parameter ${it.parameters} should be nullable"
+                "[${testInfo.displayName}] - method with the parameter ${it.parameters}"
             ) {
                 assertAnnotations(
                     annotations,
