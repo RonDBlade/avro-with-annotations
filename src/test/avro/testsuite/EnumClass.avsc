@@ -1,0 +1,7 @@
+{
+  "type": "enum",
+  "name": "EnumClass",
+  "namespace": "com.example.testsuite",
+  "doc": "Some enum schema",
+  "symbols": ["FIRST", "SECOND", "THIRD"]
+}

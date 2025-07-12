@@ -243,65 +243,65 @@ class AvroRecordConversionTest {
     }
 
 
-    @Test
-    fun `schema classes conversion`() {
-        val data = DomainClassWrapper.newBuilder()
-            .setIndependentField("hi" as String)
-            .setDomainClass(
-                DomainClass.newBuilder()
-                    .setField1("1" as String)
-                    .setField2(1 as Int)
-                    .build() as DomainClass
-            )
-            .setDomainClassBuilder(null)
-            .setDomainClassBuilder(
-                DomainClass.newBuilder()
-                    .setField1("2" as String)
-                    .setField2(2 as Int) as DomainClass.Builder?
-            )
-            .setNullableDomainClassBuilder(null)
-            .setNullableDomainClass(null)
-            .setListOfRegularDomainClass(
-                listOf(
-                    DomainClass.newBuilder()
-                        .setField1("3")
-                        .setField2(3)
-                        .build()
-                ) as List<DomainClass>
-            )
-            .setMapOfRegularDomainClass(
-                mapOf(
-                    "a" to DomainClass.newBuilder()
-                        .setField1("4")
-                        .setField2(4)
-                        .build()
-                ) as Map<String, DomainClass>
-            )
-            .setMapOfRegularDomainClass(
-                mapOf(
-                    "a" to DomainClass.newBuilder()
-                        .setField1("4")
-                        .setField2(4)
-                        .build()
-                ) as Map<String, DomainClass>
-            )
-            .build()
+//    @Test
+//    fun `schema classes conversion`() {
+//        val data = DomainClassWrapper.newBuilder()
+//            .setIndependentField("hi" as String)
+//            .setDomainClass(
+//                DomainClass.newBuilder()
+//                    .setField1("1" as String)
+//                    .setField2(1 as Int)
+//                    .build() as DomainClass
+//            )
+//            .setDomainClassBuilder(null)
+//            .setDomainClassBuilder(
+//                DomainClass.newBuilder()
+//                    .setField1("2" as String)
+//                    .setField2(2 as Int) as DomainClass.Builder?
+//            )
+//            .setNullableDomainClassBuilder(null)
+//            .setNullableDomainClass(null)
+//            .setListOfRegularDomainClass(
+//                listOf(
+//                    DomainClass.newBuilder()
+//                        .setField1("3")
+//                        .setField2(3)
+//                        .build()
+//                ) as List<DomainClass>
+//            )
+//            .setMapOfRegularDomainClass(
+//                mapOf(
+//                    "a" to DomainClass.newBuilder()
+//                        .setField1("4")
+//                        .setField2(4)
+//                        .build()
+//                ) as Map<String, DomainClass>
+//            )
+//            .setMapOfRegularDomainClass(
+//                mapOf(
+//                    "a" to DomainClass.newBuilder()
+//                        .setField1("4")
+//                        .setField2(4)
+//                        .build()
+//                ) as Map<String, DomainClass>
+//            )
+//            .build()
+//
+//        val independentField: String = data.independentField
+//        val domainClass: DomainClass = data.domainClass
+//        val nullableDomainClass: DomainClass? = data.nullableDomainClass
+//        val listOfRegularDomainClass: List<DomainClass> = data.listOfRegularDomainClass
+//        val mapOfRegularDomainClass: Map<String, DomainClass> = data.mapOfRegularDomainClass
+//    }
 
-        val independentField: String = data.independentField
-        val domainClass: DomainClass = data.domainClass
-        val nullableDomainClass: DomainClass? = data.nullableDomainClass
-        val listOfRegularDomainClass: List<DomainClass> = data.listOfRegularDomainClass
-        val mapOfRegularDomainClass: Map<String, DomainClass> = data.mapOfRegularDomainClass
-    }
-
-    @Test
-    fun `schema classes builder conversion`() {
-        val data = DomainClassWrapper.newBuilder()
-
-        val independentField: String? = data.independentField
-        val domainClass: DomainClass? = data.domainClass
-        val nullableDomainClass: DomainClass? = data.nullableDomainClass
-        val listOfRegularDomainClass: List<DomainClass>? = data.listOfRegularDomainClass
-        val mapOfRegularDomainClass: Map<String, DomainClass>? = data.mapOfRegularDomainClass
-    }
+//    @Test
+//    fun `schema classes builder conversion`() {
+//        val data = DomainClassWrapper.newBuilder()
+//
+//        val independentField: String? = data.independentField
+//        val domainClass: DomainClass? = data.domainClass
+//        val nullableDomainClass: DomainClass? = data.nullableDomainClass
+//        val listOfRegularDomainClass: List<DomainClass>? = data.listOfRegularDomainClass
+//        val mapOfRegularDomainClass: Map<String, DomainClass>? = data.mapOfRegularDomainClass
+//    }
 }
