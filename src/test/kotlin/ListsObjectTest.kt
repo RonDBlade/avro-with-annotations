@@ -187,6 +187,10 @@ class ListsObjectTest {
     fun `test that the build method of the builder is marked as not nullable`() {
         val buildMethodDescription = schemaBuilderClass.declaredMethods
             .filter(ElementMatchers.named("build"))
+            /*
+            * Note: Adding this filter because for unknown reason it had found 2 build methods, so I added additional
+            *  filter so that only the actually used one will be tested.
+            */
             .filter(ElementMatchers.returns(TypeDescription.ForLoadedType(ListsObject::class.java)))
             .only
 
