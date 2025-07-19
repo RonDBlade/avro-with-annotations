@@ -1,5 +1,6 @@
 import com.example.testsuite.BasicObject
 import net.bytebuddy.description.annotation.AnnotationList
+import net.bytebuddy.description.method.MethodDescription
 import net.bytebuddy.description.type.TypeDescription
 import net.bytebuddy.dynamic.ClassFileLocator
 import net.bytebuddy.matcher.ElementMatchers
@@ -639,38 +640,66 @@ class BasicObjectTest {
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
     @MethodSource("nullableNonPrimitiveFieldsOfSchema")
     fun `test nullable non primitive field setter method is marked as not nullable in the builder`(fieldName: String) {
-        val methodName = "set${fieldName[0].uppercase() + fieldName.substring(1)}"
-        val methodDescription = schemaBuilderClass.declaredMethods
-            .filter(ElementMatchers.named(methodName))
-            .only
+//        val methodName = "set${fieldName[0].uppercase() + fieldName.substring(1)}"
+//        val methodDescription = schemaBuilderClass.declaredMethods
+//            .filter(ElementMatchers.named(methodName))
+//            .only
+        val methodDescription = schemaBuilderClass.extractMatchingMethod(fieldName, MethodType.SETTER)
 
         val annotations = methodDescription.declaredAnnotations
 
-        assertAnnotations(
-            annotations,
-            existingAnnotation = NON_NULL_ANNOTATION_TYPE,
-            nonExistingAnnotation = NULLABLE_ANNOTATION_TYPE
-        )
+        annotations.assertNotNullable()
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
     @MethodSource("nullableNonPrimitiveFieldsOfSchema")
     fun `test nullable non primitive field clear method is marked as not nullable in the builder`(fieldName: String) {
-        val methodName = "clear${fieldName[0].uppercase() + fieldName.substring(1)}"
-        val methodDescription = schemaBuilderClass.declaredMethods
-            .filter(ElementMatchers.named(methodName))
-            .only
+//        val methodName = "clear${fieldName[0].uppercase() + fieldName.substring(1)}"
+//        val methodDescription = schemaBuilderClass.declaredMethods
+//            .filter(ElementMatchers.named(methodName))
+//            .only
+        val methodDescription = schemaBuilderClass.extractMatchingMethod(fieldName, MethodType.CLEARER)
 
         val annotations = methodDescription.declaredAnnotations
 
-        assertAnnotations(
-            annotations,
-            existingAnnotation = NON_NULL_ANNOTATION_TYPE,
-            nonExistingAnnotation = NULLABLE_ANNOTATION_TYPE
-        )
+        annotations.assertNotNullable()
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    enum class MethodType {
+        GETTER,
+        SETTER,
+        CLEARER
+    }
+
+    fun TypeDescription.extractMatchingMethod(fieldName: String, type: MethodType): MethodDescription.InDefinedShape {
+        val prefix = when (type) {
+            MethodType.GETTER -> "get"
+            MethodType.SETTER -> "set"
+            MethodType.CLEARER -> "clear"
+        }
+
+        val methodName = "${prefix}${fieldName[0].uppercase() + fieldName.substring(1)}"
+
+        return this.declaredMethods.filter(ElementMatchers.named(methodName))
+            .only
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    fun AnnotationList.assertNullable() {
+        assertAnnotationsExtensionMethod(existingAnnotation = NULLABLE_ANNOTATION_TYPE, nonExistingAnnotation = NON_NULL_ANNOTATION_TYPE)
+    }
+
+    fun AnnotationList.assertNotNullable() {
+        assertAnnotationsExtensionMethod(existingAnnotation = NON_NULL_ANNOTATION_TYPE, nonExistingAnnotation = NULLABLE_ANNOTATION_TYPE)
+    }
+
+    fun AnnotationList.assertAnnotationsExtensionMethod(existingAnnotation: TypeDescription,
+                                                        nonExistingAnnotation: TypeDescription) {
+        assertAnnotations(this, existingAnnotation, nonExistingAnnotation)
+    }
 
     fun assertAnnotations(
         source: AnnotationList,
