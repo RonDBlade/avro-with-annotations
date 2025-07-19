@@ -68,11 +68,7 @@ class BasicObjectTest {
             DynamicTest.dynamicTest(
                 "[${testInfo.displayName}] - method with the parameter ${it.parameters}"
             ) {
-                assertAnnotations(
-                    annotations,
-                    existingAnnotation = NON_NULL_ANNOTATION_TYPE,
-                    nonExistingAnnotation = NULLABLE_ANNOTATION_TYPE
-                )
+                annotations.assertNotNullable()
             }
         }.toList()
     }
@@ -90,11 +86,7 @@ class BasicObjectTest {
             DynamicTest.dynamicTest(
                 "[${testInfo.displayName}] - method with the parameter ${it.parameters}"
             ) {
-                assertAnnotations(
-                    annotations,
-                    existingAnnotation = NULLABLE_ANNOTATION_TYPE,
-                    nonExistingAnnotation = NON_NULL_ANNOTATION_TYPE
-                )
+                annotations.assertNullable()
             }
         }.toList()
     }
@@ -112,11 +104,7 @@ class BasicObjectTest {
 
         val annotations = buildMethodDescription.declaredAnnotations
 
-        assertAnnotations(
-            annotations,
-            existingAnnotation = NON_NULL_ANNOTATION_TYPE,
-            nonExistingAnnotation = NULLABLE_ANNOTATION_TYPE
-        )
+        annotations.assertNotNullable()
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////
@@ -130,11 +118,7 @@ class BasicObjectTest {
 
         val annotations = fieldDescription.declaredAnnotations
 
-        assertAnnotations(
-            annotations,
-            existingAnnotation = NON_NULL_ANNOTATION_TYPE,
-            nonExistingAnnotation = NULLABLE_ANNOTATION_TYPE
-        )
+        annotations.assertNotNullable()
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
@@ -146,11 +130,7 @@ class BasicObjectTest {
 
         val annotations = fieldDescription.declaredAnnotations
 
-        assertAnnotations(
-            annotations,
-            existingAnnotation = NON_NULL_ANNOTATION_TYPE,
-            nonExistingAnnotation = NULLABLE_ANNOTATION_TYPE
-        )
+        annotations.assertNotNullable()
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
@@ -163,11 +143,7 @@ class BasicObjectTest {
 
         val annotations = methodDescription.declaredAnnotations
 
-        assertAnnotations(
-            annotations,
-            existingAnnotation = NON_NULL_ANNOTATION_TYPE,
-            nonExistingAnnotation = NULLABLE_ANNOTATION_TYPE
-        )
+        annotations.assertNotNullable()
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
@@ -180,11 +156,7 @@ class BasicObjectTest {
 
         val annotations = methodDescription.declaredAnnotations
 
-        assertAnnotations(
-            annotations,
-            existingAnnotation = NON_NULL_ANNOTATION_TYPE,
-            nonExistingAnnotation = NULLABLE_ANNOTATION_TYPE
-        )
+        annotations.assertNotNullable()
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
@@ -198,11 +170,7 @@ class BasicObjectTest {
 
         val annotations = parameter.declaredAnnotations
 
-        assertAnnotations(
-            annotations,
-            existingAnnotation = NON_NULL_ANNOTATION_TYPE,
-            nonExistingAnnotation = NULLABLE_ANNOTATION_TYPE
-        )
+        annotations.assertNotNullable()
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
@@ -216,11 +184,7 @@ class BasicObjectTest {
 
         val annotations = parameter.declaredAnnotations
 
-        assertAnnotations(
-            annotations,
-            existingAnnotation = NON_NULL_ANNOTATION_TYPE,
-            nonExistingAnnotation = NULLABLE_ANNOTATION_TYPE
-        )
+        annotations.assertNotNullable()
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
@@ -233,11 +197,7 @@ class BasicObjectTest {
 
         val annotations = methodDescription.declaredAnnotations
 
-        assertAnnotations(
-            annotations,
-            existingAnnotation = NON_NULL_ANNOTATION_TYPE,
-            nonExistingAnnotation = NULLABLE_ANNOTATION_TYPE
-        )
+        annotations.assertNotNullable()
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
@@ -250,11 +210,7 @@ class BasicObjectTest {
 
         val annotations = methodDescription.declaredAnnotations
 
-        assertAnnotations(
-            annotations,
-            existingAnnotation = NON_NULL_ANNOTATION_TYPE,
-            nonExistingAnnotation = NULLABLE_ANNOTATION_TYPE
-        )
+        annotations.assertNotNullable()
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////
@@ -268,11 +224,7 @@ class BasicObjectTest {
 
         val annotations = fieldDescription.declaredAnnotations
 
-        assertAnnotations(
-            annotations,
-            existingAnnotation = NULLABLE_ANNOTATION_TYPE,
-            nonExistingAnnotation = NON_NULL_ANNOTATION_TYPE
-        )
+        annotations.assertNullable()
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
@@ -284,11 +236,7 @@ class BasicObjectTest {
 
         val annotations = fieldDescription.declaredAnnotations
 
-        assertAnnotations(
-            annotations,
-            existingAnnotation = NULLABLE_ANNOTATION_TYPE,
-            nonExistingAnnotation = NON_NULL_ANNOTATION_TYPE
-        )
+        annotations.assertNullable()
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
@@ -301,11 +249,7 @@ class BasicObjectTest {
 
         val annotations = methodDescription.declaredAnnotations
 
-        assertAnnotations(
-            annotations,
-            existingAnnotation = NULLABLE_ANNOTATION_TYPE,
-            nonExistingAnnotation = NON_NULL_ANNOTATION_TYPE
-        )
+        annotations.assertNullable()
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
@@ -318,11 +262,7 @@ class BasicObjectTest {
 
         val annotations = methodDescription.declaredAnnotations
 
-        assertAnnotations(
-            annotations,
-            existingAnnotation = NULLABLE_ANNOTATION_TYPE,
-            nonExistingAnnotation = NON_NULL_ANNOTATION_TYPE
-        )
+        annotations.assertNullable()
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
@@ -336,11 +276,7 @@ class BasicObjectTest {
 
         val annotations = parameter.declaredAnnotations
 
-        assertAnnotations(
-            annotations,
-            existingAnnotation = NULLABLE_ANNOTATION_TYPE,
-            nonExistingAnnotation = NON_NULL_ANNOTATION_TYPE
-        )
+        annotations.assertNullable()
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
@@ -354,11 +290,7 @@ class BasicObjectTest {
 
         val annotations = parameter.declaredAnnotations
 
-        assertAnnotations(
-            annotations,
-            existingAnnotation = NULLABLE_ANNOTATION_TYPE,
-            nonExistingAnnotation = NON_NULL_ANNOTATION_TYPE
-        )
+        annotations.assertNullable()
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
@@ -371,11 +303,7 @@ class BasicObjectTest {
 
         val annotations = methodDescription.declaredAnnotations
 
-        assertAnnotations(
-            annotations,
-            existingAnnotation = NON_NULL_ANNOTATION_TYPE,
-            nonExistingAnnotation = NULLABLE_ANNOTATION_TYPE
-        )
+        annotations.assertNotNullable()
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
@@ -388,11 +316,7 @@ class BasicObjectTest {
 
         val annotations = methodDescription.declaredAnnotations
 
-        assertAnnotations(
-            annotations,
-            existingAnnotation = NON_NULL_ANNOTATION_TYPE,
-            nonExistingAnnotation = NULLABLE_ANNOTATION_TYPE
-        )
+        annotations.assertNotNullable()
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////
@@ -406,11 +330,7 @@ class BasicObjectTest {
 
         val annotations = fieldDescription.declaredAnnotations
 
-        assertAnnotations(
-            annotations,
-            existingAnnotation = NON_NULL_ANNOTATION_TYPE,
-            nonExistingAnnotation = NULLABLE_ANNOTATION_TYPE
-        )
+        annotations.assertNotNullable()
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
@@ -422,11 +342,7 @@ class BasicObjectTest {
 
         val annotations = fieldDescription.declaredAnnotations
 
-        assertAnnotations(
-            annotations,
-            existingAnnotation = NULLABLE_ANNOTATION_TYPE,
-            nonExistingAnnotation = NON_NULL_ANNOTATION_TYPE
-        )
+        annotations.assertNullable()
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
@@ -439,11 +355,7 @@ class BasicObjectTest {
 
         val annotations = methodDescription.declaredAnnotations
 
-        assertAnnotations(
-            annotations,
-            existingAnnotation = NON_NULL_ANNOTATION_TYPE,
-            nonExistingAnnotation = NULLABLE_ANNOTATION_TYPE
-        )
+        annotations.assertNotNullable()
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
@@ -456,11 +368,7 @@ class BasicObjectTest {
 
         val annotations = methodDescription.declaredAnnotations
 
-        assertAnnotations(
-            annotations,
-            existingAnnotation = NULLABLE_ANNOTATION_TYPE,
-            nonExistingAnnotation = NON_NULL_ANNOTATION_TYPE
-        )
+        annotations.assertNullable()
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
@@ -474,11 +382,7 @@ class BasicObjectTest {
 
         val annotations = parameter.declaredAnnotations
 
-        assertAnnotations(
-            annotations,
-            existingAnnotation = NON_NULL_ANNOTATION_TYPE,
-            nonExistingAnnotation = NULLABLE_ANNOTATION_TYPE
-        )
+        annotations.assertNotNullable()
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
@@ -492,11 +396,7 @@ class BasicObjectTest {
 
         val annotations = parameter.declaredAnnotations
 
-        assertAnnotations(
-            annotations,
-            existingAnnotation = NON_NULL_ANNOTATION_TYPE,
-            nonExistingAnnotation = NULLABLE_ANNOTATION_TYPE
-        )
+        annotations.assertNotNullable()
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
@@ -509,11 +409,7 @@ class BasicObjectTest {
 
         val annotations = methodDescription.declaredAnnotations
 
-        assertAnnotations(
-            annotations,
-            existingAnnotation = NON_NULL_ANNOTATION_TYPE,
-            nonExistingAnnotation = NULLABLE_ANNOTATION_TYPE
-        )
+        annotations.assertNotNullable()
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
@@ -526,11 +422,7 @@ class BasicObjectTest {
 
         val annotations = methodDescription.declaredAnnotations
 
-        assertAnnotations(
-            annotations,
-            existingAnnotation = NON_NULL_ANNOTATION_TYPE,
-            nonExistingAnnotation = NULLABLE_ANNOTATION_TYPE
-        )
+        annotations.assertNotNullable()
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////
@@ -544,11 +436,7 @@ class BasicObjectTest {
 
         val annotations = fieldDescription.declaredAnnotations
 
-        assertAnnotations(
-            annotations,
-            existingAnnotation = NULLABLE_ANNOTATION_TYPE,
-            nonExistingAnnotation = NON_NULL_ANNOTATION_TYPE
-        )
+        annotations.assertNullable()
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
@@ -560,11 +448,7 @@ class BasicObjectTest {
 
         val annotations = fieldDescription.declaredAnnotations
 
-        assertAnnotations(
-            annotations,
-            existingAnnotation = NULLABLE_ANNOTATION_TYPE,
-            nonExistingAnnotation = NON_NULL_ANNOTATION_TYPE
-        )
+        annotations.assertNullable()
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
@@ -577,11 +461,7 @@ class BasicObjectTest {
 
         val annotations = methodDescription.declaredAnnotations
 
-        assertAnnotations(
-            annotations,
-            existingAnnotation = NULLABLE_ANNOTATION_TYPE,
-            nonExistingAnnotation = NON_NULL_ANNOTATION_TYPE
-        )
+        annotations.assertNullable()
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
@@ -594,11 +474,7 @@ class BasicObjectTest {
 
         val annotations = methodDescription.declaredAnnotations
 
-        assertAnnotations(
-            annotations,
-            existingAnnotation = NULLABLE_ANNOTATION_TYPE,
-            nonExistingAnnotation = NON_NULL_ANNOTATION_TYPE
-        )
+        annotations.assertNullable()
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
@@ -612,11 +488,7 @@ class BasicObjectTest {
 
         val annotations = parameter.declaredAnnotations
 
-        assertAnnotations(
-            annotations,
-            existingAnnotation = NULLABLE_ANNOTATION_TYPE,
-            nonExistingAnnotation = NON_NULL_ANNOTATION_TYPE
-        )
+        annotations.assertNullable()
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
@@ -630,20 +502,12 @@ class BasicObjectTest {
 
         val annotations = parameter.declaredAnnotations
 
-        assertAnnotations(
-            annotations,
-            existingAnnotation = NULLABLE_ANNOTATION_TYPE,
-            nonExistingAnnotation = NON_NULL_ANNOTATION_TYPE
-        )
+        annotations.assertNullable()
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
     @MethodSource("nullableNonPrimitiveFieldsOfSchema")
     fun `test nullable non primitive field setter method is marked as not nullable in the builder`(fieldName: String) {
-//        val methodName = "set${fieldName[0].uppercase() + fieldName.substring(1)}"
-//        val methodDescription = schemaBuilderClass.declaredMethods
-//            .filter(ElementMatchers.named(methodName))
-//            .only
         val methodDescription = schemaBuilderClass.extractMatchingMethod(fieldName, MethodType.SETTER)
 
         val annotations = methodDescription.declaredAnnotations
@@ -654,10 +518,6 @@ class BasicObjectTest {
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
     @MethodSource("nullableNonPrimitiveFieldsOfSchema")
     fun `test nullable non primitive field clear method is marked as not nullable in the builder`(fieldName: String) {
-//        val methodName = "clear${fieldName[0].uppercase() + fieldName.substring(1)}"
-//        val methodDescription = schemaBuilderClass.declaredMethods
-//            .filter(ElementMatchers.named(methodName))
-//            .only
         val methodDescription = schemaBuilderClass.extractMatchingMethod(fieldName, MethodType.CLEARER)
 
         val annotations = methodDescription.declaredAnnotations
