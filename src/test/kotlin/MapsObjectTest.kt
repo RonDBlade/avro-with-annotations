@@ -12,6 +12,8 @@ import org.junit.jupiter.params.provider.MethodSource
 import TestUtils.assertNotNullable
 import TestUtils.assertNullable
 import TestUtils.extractMatchingMethod
+import TestUtils.filterFieldsByName
+import TestUtils.filterMethodsByName
 import TestUtils.NON_NULL_ANNOTATION_TYPE
 import TestUtils.NULLABLE_ANNOTATION_TYPE
 import TestUtils.assertAnnotations
@@ -132,8 +134,7 @@ class MapsObjectTest {
 
     @TestFactory
     fun `test newBuilder methods are marked not nullable`(testInfo: TestInfo): List<DynamicTest> {
-        val newBuilderMethodsDescription = schemaClass.declaredMethods
-            .filter(ElementMatchers.named("newBuilder"))
+        val newBuilderMethodsDescription = schemaClass.filterMethodsByName("newBuilder")
 
         return newBuilderMethodsDescription.map {
             val annotations = it.declaredAnnotations
@@ -148,8 +149,7 @@ class MapsObjectTest {
 
     @TestFactory
     fun `test newBuilder methods parameter is marked nullable`(testInfo: TestInfo): List<DynamicTest> {
-        val copyBuilderMethodsDescription = schemaClass.declaredMethods
-            .filter(ElementMatchers.named("newBuilder"))
+        val copyBuilderMethodsDescription = schemaClass.filterMethodsByName("newBuilder")
             .filter(ElementMatchers.takesArguments(1))
 
         return copyBuilderMethodsDescription.map {
@@ -166,8 +166,7 @@ class MapsObjectTest {
 
     @Test
     fun `test that the build method of the builder is marked as not nullable`() {
-        val buildMethodDescription = schemaBuilderClass.declaredMethods
-            .filter(ElementMatchers.named("build"))
+        val buildMethodDescription = schemaBuilderClass.filterMethodsByName("build")
             /*
             * Note: Adding this filter because for unknown reason it had found 2 build methods, so I added additional
             *  filter so that only the actually used one will be tested.
@@ -186,8 +185,7 @@ class MapsObjectTest {
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
     @MethodSource("mapFieldsOfSchema")
     fun `test map field is marked as not nullable in the schema`(fieldName: String) {
-        val fieldDescription = schemaClass.declaredFields
-            .filter(ElementMatchers.named(fieldName))
+        val fieldDescription = schemaClass.filterFieldsByName(fieldName)
             .only
 
         val annotations = fieldDescription.declaredAnnotations
@@ -198,8 +196,7 @@ class MapsObjectTest {
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
     @MethodSource("mapFieldsOfSchema")
     fun `test map field is still marked as nullable in the builder`(fieldName: String) {
-        val fieldDescription = schemaBuilderClass.declaredFields
-            .filter(ElementMatchers.named(fieldName))
+        val fieldDescription = schemaBuilderClass.filterFieldsByName(fieldName)
             .only
 
         val annotations = fieldDescription.declaredAnnotations
@@ -286,8 +283,7 @@ class MapsObjectTest {
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
     @MethodSource("nullableMapFieldsOfSchema")
     fun `test nullable map field is marked as nullable in the schema`(fieldName: String) {
-        val fieldDescription = schemaClass.declaredFields
-            .filter(ElementMatchers.named(fieldName))
+        val fieldDescription = schemaClass.filterFieldsByName(fieldName)
             .only
 
         val annotations = fieldDescription.declaredAnnotations
@@ -298,8 +294,7 @@ class MapsObjectTest {
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
     @MethodSource("nullableMapFieldsOfSchema")
     fun `test nullable map field is marked as nullable in the builder`(fieldName: String) {
-        val fieldDescription = schemaBuilderClass.declaredFields
-            .filter(ElementMatchers.named(fieldName))
+        val fieldDescription = schemaBuilderClass.filterFieldsByName(fieldName)
             .only
 
         val annotations = fieldDescription.declaredAnnotations
@@ -388,8 +383,7 @@ class MapsObjectTest {
     fun `test that field whose first level value template type is not nullable, the template value is marked as not nullable while the keys are marked as not nullable`(
         clazz: TypeDescription, fieldName: String
     ) {
-        val fieldTypeDescription = clazz.declaredFields
-            .filter(ElementMatchers.named(fieldName))
+        val fieldTypeDescription = clazz.filterFieldsByName(fieldName)
             .only
             .type
 

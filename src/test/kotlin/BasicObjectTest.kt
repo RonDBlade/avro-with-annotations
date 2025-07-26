@@ -12,6 +12,8 @@ import TestUtils.assertNullable
 import TestUtils.assertNotNullable
 import TestUtils.extractField
 import TestUtils.extractMatchingMethod
+import TestUtils.filterFieldsByName
+import TestUtils.filterMethodsByName
 import TestUtils.SchemaMethodType
 
 class BasicObjectTest {
@@ -47,8 +49,7 @@ class BasicObjectTest {
 
     @TestFactory
     fun `test newBuilder methods are marked not nullable`(testInfo: TestInfo): List<DynamicTest> {
-        val newBuilderMethodsDescription = schemaClass.declaredMethods
-            .filter(ElementMatchers.named("newBuilder"))
+        val newBuilderMethodsDescription = schemaClass.filterMethodsByName("newBuilder")
 
         return newBuilderMethodsDescription.map {
             val annotations = it.declaredAnnotations
@@ -63,8 +64,7 @@ class BasicObjectTest {
 
     @TestFactory
     fun `test newBuilder methods parameter is marked nullable`(testInfo: TestInfo): List<DynamicTest> {
-        val copyBuilderMethodsDescription = schemaClass.declaredMethods
-            .filter(ElementMatchers.named("newBuilder"))
+        val copyBuilderMethodsDescription = schemaClass.filterMethodsByName("newBuilder")
             .filter(ElementMatchers.takesArguments(1))
 
         return copyBuilderMethodsDescription.map {
@@ -81,8 +81,7 @@ class BasicObjectTest {
 
     @Test
     fun `test that the build method of the builder is marked as not nullable`() {
-        val buildMethodDescription = schemaBuilderClass.declaredMethods
-            .filter(ElementMatchers.named("build"))
+        val buildMethodDescription = schemaBuilderClass.filterMethodsByName("build")
             /*
             * Note: Adding this filter because for unknown reason it had found 2 build methods, so I added additional
             *  filter so that only the actually used one will be tested.

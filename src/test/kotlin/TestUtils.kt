@@ -59,10 +59,26 @@ object TestUtils {
      * Extension function to extract a field by name from a TypeDescription.
      */
     fun TypeDescription.extractField(fieldName: String): FieldDescription.InDefinedShape {
-        return this.declaredFields
-            .filter(ElementMatchers.named(fieldName))
-            .only
+        return this.filterFieldsByName(fieldName).only
     }
+
+    /**
+     * Extension function to filter declared fields by name from a TypeDescription.
+     * 
+     * @param fieldName The name of the field to filter by
+     * @return FilterableList of fields matching the given name
+     */
+    fun TypeDescription.filterFieldsByName(fieldName: String) = 
+        this.declaredFields.filter(ElementMatchers.named(fieldName))
+
+    /**
+     * Extension function to filter declared methods by name from a TypeDescription.
+     * 
+     * @param methodName The name of the method to filter by
+     * @return FilterableList of methods matching the given name
+     */
+    fun TypeDescription.filterMethodsByName(methodName: String) = 
+        this.declaredMethods.filter(ElementMatchers.named(methodName))
 
     /**
      * Extension function to extract a method by field name and method type from a TypeDescription.
@@ -78,8 +94,7 @@ object TestUtils {
 
         val methodName = "${prefix}${targetFieldName[0].uppercase() + targetFieldName.substring(1)}"
 
-        return this.declaredMethods.filter(ElementMatchers.named(methodName))
-            .only
+        return this.filterMethodsByName(methodName).only
     }
 
     /**

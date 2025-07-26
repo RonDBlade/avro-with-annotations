@@ -1,6 +1,8 @@
 import TestUtils.assertNotNullable
 import TestUtils.assertNullable
 import TestUtils.extractMatchingMethod
+import TestUtils.filterFieldsByName
+import TestUtils.filterMethodsByName
 import com.example.testsuite.ListsObject
 import net.bytebuddy.description.type.TypeDescription
 import net.bytebuddy.matcher.ElementMatchers
@@ -128,8 +130,7 @@ class ListsObjectTest {
 
     @TestFactory
     fun `test newBuilder methods are marked not nullable`(testInfo: TestInfo): List<DynamicTest> {
-        val newBuilderMethodsDescription = schemaClass.declaredMethods
-            .filter(ElementMatchers.named("newBuilder"))
+        val newBuilderMethodsDescription = schemaClass.filterMethodsByName("newBuilder")
 
         return newBuilderMethodsDescription.map {
             val annotations = it.declaredAnnotations
@@ -144,8 +145,7 @@ class ListsObjectTest {
 
     @TestFactory
     fun `test newBuilder methods parameter is marked nullable`(testInfo: TestInfo): List<DynamicTest> {
-        val copyBuilderMethodsDescription = schemaClass.declaredMethods
-            .filter(ElementMatchers.named("newBuilder"))
+        val copyBuilderMethodsDescription = schemaClass.filterMethodsByName("newBuilder")
             .filter(ElementMatchers.takesArguments(1))
 
         return copyBuilderMethodsDescription.map {
@@ -162,8 +162,7 @@ class ListsObjectTest {
 
     @Test
     fun `test that the build method of the builder is marked as not nullable`() {
-        val buildMethodDescription = schemaBuilderClass.declaredMethods
-            .filter(ElementMatchers.named("build"))
+        val buildMethodDescription = schemaBuilderClass.filterMethodsByName("build")
             /*
             * Note: Adding this filter because for unknown reason it had found 2 build methods, so I added additional
             *  filter so that only the actually used one will be tested.
@@ -181,8 +180,7 @@ class ListsObjectTest {
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
     @MethodSource("listFieldsOfSchema")
     fun `test list field is marked as not nullable in the schema`(fieldName: String) {
-        val fieldDescription = schemaClass.declaredFields
-            .filter(ElementMatchers.named(fieldName))
+        val fieldDescription = schemaClass.filterFieldsByName(fieldName)
             .only
 
         val annotations = fieldDescription.declaredAnnotations
@@ -193,8 +191,7 @@ class ListsObjectTest {
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
     @MethodSource("listFieldsOfSchema")
     fun `test list field is still marked as nullable in the builder`(fieldName: String) {
-        val fieldDescription = schemaBuilderClass.declaredFields
-            .filter(ElementMatchers.named(fieldName))
+        val fieldDescription = schemaBuilderClass.filterFieldsByName(fieldName)
             .only
 
         val annotations = fieldDescription.declaredAnnotations
@@ -281,8 +278,7 @@ class ListsObjectTest {
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
     @MethodSource("nullableListFieldsOfSchema")
     fun `test nullable list field is marked as nullable in the schema`(fieldName: String) {
-        val fieldDescription = schemaClass.declaredFields
-            .filter(ElementMatchers.named(fieldName))
+        val fieldDescription = schemaClass.filterFieldsByName(fieldName)
             .only
 
         val annotations = fieldDescription.declaredAnnotations
@@ -293,8 +289,7 @@ class ListsObjectTest {
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
     @MethodSource("nullableListFieldsOfSchema")
     fun `test nullable list field is marked as nullable in the builder`(fieldName: String) {
-        val fieldDescription = schemaBuilderClass.declaredFields
-            .filter(ElementMatchers.named(fieldName))
+        val fieldDescription = schemaBuilderClass.filterFieldsByName(fieldName)
             .only
 
         val annotations = fieldDescription.declaredAnnotations
@@ -383,8 +378,7 @@ class ListsObjectTest {
     fun `test that field whose first level template type is not nullable, the template is marked as not nullable`(
         clazz: TypeDescription, fieldName: String
     ) {
-        val fieldTemplateTypeDescription = clazz.declaredFields
-            .filter(ElementMatchers.named(fieldName))
+        val fieldTemplateTypeDescription = clazz.filterFieldsByName(fieldName)
             .only
             .type
             .typeArguments[0]
@@ -432,8 +426,7 @@ class ListsObjectTest {
     fun `test that field whose first level template type is nullable, the template is marked as nullable`(
         clazz: TypeDescription, fieldName: String
     ) {
-        val fieldTemplateTypeDescription = clazz.declaredFields
-            .filter(ElementMatchers.named(fieldName))
+        val fieldTemplateTypeDescription = clazz.filterFieldsByName(fieldName)
             .only
             .type
             .typeArguments[0]
@@ -481,8 +474,7 @@ class ListsObjectTest {
     fun `test that field whose second level template type is not nullable, the template is marked as not nullable`(
         clazz: TypeDescription, fieldName: String
     ) {
-        val fieldSecondLevelTemplateTypeDescription = clazz.declaredFields
-            .filter(ElementMatchers.named(fieldName))
+        val fieldSecondLevelTemplateTypeDescription = clazz.filterFieldsByName(fieldName)
             .only
             .type
             .typeArguments[0]
@@ -532,8 +524,7 @@ class ListsObjectTest {
     fun `test that field whose second level template type is nullable, the template is marked as nullable`(
         clazz: TypeDescription, fieldName: String
     ) {
-        val fieldSecondLevelTemplateTypeDescription = clazz.declaredFields
-            .filter(ElementMatchers.named(fieldName))
+        val fieldSecondLevelTemplateTypeDescription = clazz.filterFieldsByName(fieldName)
             .only
             .type
             .typeArguments[0]

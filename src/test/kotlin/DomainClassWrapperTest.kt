@@ -11,6 +11,8 @@ import org.junit.jupiter.params.provider.ValueSource
 import TestUtils.assertNotNullable
 import TestUtils.assertNullable
 import TestUtils.extractMatchingMethod
+import TestUtils.filterMethodsByName
+import TestUtils.filterFieldsByName
 
 class DomainClassWrapperTest {
 
@@ -32,7 +34,7 @@ class DomainClassWrapperTest {
 
     @TestFactory
     fun `test newBuilder methods are marked not nullable`(testInfo: TestInfo): List<DynamicTest> {
-        val newBuilderMethodsDescription = schemaClass.declaredMethods.filter(ElementMatchers.named("newBuilder"))
+        val newBuilderMethodsDescription = schemaClass.filterMethodsByName("newBuilder")
 
         return newBuilderMethodsDescription.map {
             val annotations = it.declaredAnnotations
@@ -47,7 +49,7 @@ class DomainClassWrapperTest {
 
     @TestFactory
     fun `test newBuilder methods parameter is marked nullable`(testInfo: TestInfo): List<DynamicTest> {
-        val copyBuilderMethodsDescription = schemaClass.declaredMethods.filter(ElementMatchers.named("newBuilder"))
+        val copyBuilderMethodsDescription = schemaClass.filterMethodsByName("newBuilder")
             .filter(ElementMatchers.takesArguments(1))
 
         return copyBuilderMethodsDescription.map {
@@ -64,7 +66,7 @@ class DomainClassWrapperTest {
 
     @Test
     fun `test that the build method of the builder is marked as not nullable`() {
-        val buildMethodDescription = schemaBuilderClass.declaredMethods.filter(ElementMatchers.named("build"))/*
+        val buildMethodDescription = schemaBuilderClass.filterMethodsByName("build")/*
             * Note: Adding this filter because for unknown reason it had found 2 build methods, so I added additional
             *  filter so that only the actually used one will be tested.
             */.filter(ElementMatchers.returns(TypeDescription.ForLoadedType(DomainClassWrapper::class.java))).only
@@ -79,7 +81,7 @@ class DomainClassWrapperTest {
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
     @ValueSource(strings = ["independentEnum", "domainClass"])
     fun `test schema generated field is marked as not nullable in the schema`(fieldName: String) {
-        val fieldDescription = schemaClass.declaredFields.filter(ElementMatchers.named(fieldName)).only
+        val fieldDescription = schemaClass.filterFieldsByName(fieldName).only
 
         val annotations = fieldDescription.declaredAnnotations
 
@@ -89,7 +91,7 @@ class DomainClassWrapperTest {
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
     @ValueSource(strings = ["independentEnum", "domainClass"])
     fun `test schema generated field is still marked as nullable in the builder`(fieldName: String) {
-        val fieldDescription = schemaBuilderClass.declaredFields.filter(ElementMatchers.named(fieldName)).only
+        val fieldDescription = schemaBuilderClass.filterFieldsByName(fieldName).only
 
         val annotations = fieldDescription.declaredAnnotations
 
@@ -173,7 +175,7 @@ class DomainClassWrapperTest {
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
     @ValueSource(strings = ["nullableIndependentEnum", "nullableDomainClass"])
     fun `test nullable schema generated field is marked as nullable in the schema`(fieldName: String) {
-        val fieldDescription = schemaClass.declaredFields.filter(ElementMatchers.named(fieldName)).only
+        val fieldDescription = schemaClass.filterFieldsByName(fieldName).only
 
         val annotations = fieldDescription.declaredAnnotations
 
@@ -183,7 +185,7 @@ class DomainClassWrapperTest {
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
     @ValueSource(strings = ["nullableIndependentEnum", "nullableDomainClass"])
     fun `test nullable schema generated field is marked as nullable in the builder`(fieldName: String) {
-        val fieldDescription = schemaBuilderClass.declaredFields.filter(ElementMatchers.named(fieldName)).only
+        val fieldDescription = schemaBuilderClass.filterFieldsByName(fieldName).only
 
         val annotations = fieldDescription.declaredAnnotations
 
@@ -272,7 +274,7 @@ class DomainClassWrapperTest {
     fun `test record builder field is marked as nullable in the builder`(fieldName: String) {
         val fieldBuilderFieldName = "${fieldName}Builder"
         val fieldDescription =
-            schemaBuilderClass.declaredFields.filter(ElementMatchers.named(fieldBuilderFieldName)).only
+            schemaBuilderClass.filterFieldsByName(fieldBuilderFieldName).only
 
         val annotations = fieldDescription.declaredAnnotations
 
