@@ -47,7 +47,7 @@ object TestUtils {
         
         // Create a TypePool to resolve type descriptions from the locator
         val typePool = TypePool.Default.of(locator)
-        
+
         // Describe and resolve the target classes
         val schemaClass = typePool.describe(schemaClassName).resolve()
         val schemaBuilderClass = typePool.describe(schemaBuilderClassName).resolve()
@@ -59,7 +59,7 @@ object TestUtils {
      * Extension function to extract a field by name from a TypeDescription.
      */
     fun TypeDescription.extractField(fieldName: String): FieldDescription.InDefinedShape {
-        return this.filterFieldsByName(fieldName).only
+        return filterFieldsByName(fieldName).only
     }
 
     /**
@@ -69,7 +69,7 @@ object TestUtils {
      * @return FilterableList of fields matching the given name
      */
     fun TypeDescription.filterFieldsByName(fieldName: String) = 
-        this.declaredFields.filter(ElementMatchers.named(fieldName))
+        declaredFields.filter(ElementMatchers.named(fieldName))
 
     /**
      * Extension function to filter declared methods by name from a TypeDescription.
@@ -78,7 +78,7 @@ object TestUtils {
      * @return FilterableList of methods matching the given name
      */
     fun TypeDescription.filterMethodsByName(methodName: String) = 
-        this.declaredMethods.filter(ElementMatchers.named(methodName))
+        declaredMethods.filter(ElementMatchers.named(methodName))
 
     /**
      * Extension function to extract a method by field name and method type from a TypeDescription.
@@ -92,16 +92,19 @@ object TestUtils {
             SchemaMethodType.BUILDER_SETTER -> "set" to "${fieldName}Builder"
         }
 
-        val methodName = "${prefix}${targetFieldName[0].uppercase() + targetFieldName.substring(1)}"
 
-        return this.filterMethodsByName(methodName).only
+
+        val methodName = "${prefix}${targetFieldName.replaceFirstChar { it.uppercaseChar() }}"
+
+        return filterMethodsByName(methodName).only
     }
 
     /**
      * Extension function to assert that an AnnotationList contains nullable annotations.
      */
     fun AnnotationList.assertNullable() {
-        assertAnnotationsExtensionMethod(
+        assertAnnotations(
+            this,
             existingAnnotation = NULLABLE_ANNOTATION_TYPE, 
             nonExistingAnnotation = NON_NULL_ANNOTATION_TYPE
         )
@@ -111,20 +114,11 @@ object TestUtils {
      * Extension function to assert that an AnnotationList contains not-null annotations.
      */
     fun AnnotationList.assertNotNullable() {
-        assertAnnotationsExtensionMethod(
+        assertAnnotations(
+            this,
             existingAnnotation = NON_NULL_ANNOTATION_TYPE, 
             nonExistingAnnotation = NULLABLE_ANNOTATION_TYPE
         )
-    }
-
-    /**
-     * Extension function helper for annotation assertions.
-     */
-    private fun AnnotationList.assertAnnotationsExtensionMethod(
-        existingAnnotation: TypeDescription,
-        nonExistingAnnotation: TypeDescription
-    ) {
-        assertAnnotations(this, existingAnnotation, nonExistingAnnotation)
     }
 
     /**
