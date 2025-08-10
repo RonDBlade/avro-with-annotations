@@ -202,9 +202,7 @@ class ListsObjectTest {
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
     @MethodSource("listFieldsOfSchema")
     fun `test list field getter method is marked as not nullable in the schema`(fieldName: String) {
-        val methodDescription = schemaClass.extractMatchingMethod(
-            fieldName, TestUtils.SchemaMethodType.GETTER
-        )
+        val methodDescription = schemaClass.extractMatchingMethod(fieldName, TestUtils.SchemaMethodType.GETTER)
 
         val annotations = methodDescription.declaredAnnotations
 
@@ -214,9 +212,7 @@ class ListsObjectTest {
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
     @MethodSource("listFieldsOfSchema")
     fun `test list field getter method is still marked as nullable in the builder`(fieldName: String) {
-        val methodDescription = schemaBuilderClass.extractMatchingMethod(
-            fieldName, TestUtils.SchemaMethodType.GETTER
-        )
+        val methodDescription = schemaBuilderClass.extractMatchingMethod(fieldName, TestUtils.SchemaMethodType.GETTER)
 
         val annotations = methodDescription.declaredAnnotations
 
@@ -226,9 +222,7 @@ class ListsObjectTest {
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
     @MethodSource("listFieldsOfSchema")
     fun `test list field setter method parameter is marked as not nullable in the schema`(fieldName: String) {
-        val methodDescription = schemaClass.extractMatchingMethod(
-            fieldName, TestUtils.SchemaMethodType.SETTER
-        )
+        val methodDescription = schemaClass.extractMatchingMethod(fieldName, TestUtils.SchemaMethodType.SETTER)
         val parameter = methodDescription.parameters[0]
 
         val annotations = parameter.declaredAnnotations
@@ -239,9 +233,7 @@ class ListsObjectTest {
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
     @MethodSource("listFieldsOfSchema")
     fun `test list field setter method parameter is marked as not nullable in the builder`(fieldName: String) {
-        val methodDescription = schemaBuilderClass.extractMatchingMethod(
-            fieldName, TestUtils.SchemaMethodType.SETTER
-        )
+        val methodDescription = schemaBuilderClass.extractMatchingMethod(fieldName, TestUtils.SchemaMethodType.SETTER)
         val parameter = methodDescription.parameters[0]
 
         val annotations = parameter.declaredAnnotations
@@ -252,9 +244,7 @@ class ListsObjectTest {
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
     @MethodSource("listFieldsOfSchema")
     fun `test list field setter method is marked as not nullable in the builder`(fieldName: String) {
-        val methodDescription = schemaBuilderClass.extractMatchingMethod(
-            fieldName, TestUtils.SchemaMethodType.SETTER
-        )
+        val methodDescription = schemaBuilderClass.extractMatchingMethod(fieldName, TestUtils.SchemaMethodType.SETTER)
 
         val annotations = methodDescription.declaredAnnotations
 
@@ -264,9 +254,7 @@ class ListsObjectTest {
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
     @MethodSource("listFieldsOfSchema")
     fun `test list field clear method is marked as not nullable in the builder`(fieldName: String) {
-        val methodDescription = schemaBuilderClass.extractMatchingMethod(
-            fieldName, TestUtils.SchemaMethodType.CLEARER
-        )
+        val methodDescription = schemaBuilderClass.extractMatchingMethod(fieldName, TestUtils.SchemaMethodType.CLEARER)
 
         val annotations = methodDescription.declaredAnnotations
 
@@ -300,9 +288,7 @@ class ListsObjectTest {
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
     @MethodSource("nullableListFieldsOfSchema")
     fun `test nullable list field getter method is marked as nullable in the schema`(fieldName: String) {
-        val methodDescription = schemaClass.extractMatchingMethod(
-            fieldName, TestUtils.SchemaMethodType.GETTER
-        )
+        val methodDescription = schemaClass.extractMatchingMethod(fieldName, TestUtils.SchemaMethodType.GETTER)
 
         val annotations = methodDescription.declaredAnnotations
 
@@ -312,9 +298,7 @@ class ListsObjectTest {
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
     @MethodSource("nullableListFieldsOfSchema")
     fun `test nullable list field getter method is marked as nullable in the builder`(fieldName: String) {
-        val methodDescription = schemaBuilderClass.extractMatchingMethod(
-            fieldName, TestUtils.SchemaMethodType.GETTER
-        )
+        val methodDescription = schemaBuilderClass.extractMatchingMethod(fieldName, TestUtils.SchemaMethodType.GETTER)
 
         val annotations = methodDescription.declaredAnnotations
 
@@ -324,9 +308,7 @@ class ListsObjectTest {
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
     @MethodSource("nullableListFieldsOfSchema")
     fun `test nullable list field setter method parameter is marked as nullable in the schema`(fieldName: String) {
-        val methodDescription = schemaClass.extractMatchingMethod(
-            fieldName, TestUtils.SchemaMethodType.SETTER
-        )
+        val methodDescription = schemaClass.extractMatchingMethod(fieldName, TestUtils.SchemaMethodType.SETTER)
         val parameter = methodDescription.parameters[0]
 
         val annotations = parameter.declaredAnnotations
@@ -337,9 +319,7 @@ class ListsObjectTest {
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
     @MethodSource("nullableListFieldsOfSchema")
     fun `test nullable list field setter method parameter is marked as nullable in the builder`(fieldName: String) {
-        val methodDescription = schemaBuilderClass.extractMatchingMethod(
-            fieldName, TestUtils.SchemaMethodType.SETTER
-        )
+        val methodDescription = schemaBuilderClass.extractMatchingMethod(fieldName, TestUtils.SchemaMethodType.SETTER)
         val parameter = methodDescription.parameters[0]
 
         val annotations = parameter.declaredAnnotations
@@ -350,9 +330,7 @@ class ListsObjectTest {
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
     @MethodSource("nullableListFieldsOfSchema")
     fun `test nullable list field setter method is marked as not nullable in the builder`(fieldName: String) {
-        val methodDescription = schemaBuilderClass.extractMatchingMethod(
-            fieldName, TestUtils.SchemaMethodType.SETTER
-        )
+        val methodDescription = schemaBuilderClass.extractMatchingMethod(fieldName, TestUtils.SchemaMethodType.SETTER)
 
         val annotations = methodDescription.declaredAnnotations
 
@@ -362,9 +340,7 @@ class ListsObjectTest {
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
     @MethodSource("nullableListFieldsOfSchema")
     fun `test nullable list field clear method is marked as not nullable in the builder`(fieldName: String) {
-        val methodDescription = schemaBuilderClass.extractMatchingMethod(
-            fieldName, TestUtils.SchemaMethodType.CLEARER
-        )
+        val methodDescription = schemaBuilderClass.extractMatchingMethod(fieldName, TestUtils.SchemaMethodType.CLEARER)
 
         val annotations = methodDescription.declaredAnnotations
 
@@ -394,8 +370,9 @@ class ListsObjectTest {
         clazz: TypeDescription, fieldName: String
     ) {
         val methodReturnTypeTemplateTypeDescription = clazz.extractMatchingMethod(
-            fieldName, TestUtils.SchemaMethodType.GETTER
-        ).returnType.typeArguments[0]
+            fieldName, TestUtils.SchemaMethodType.GETTER)
+            .returnType
+            .typeArguments[0]
 
         val annotations = methodReturnTypeTemplateTypeDescription.declaredAnnotations
 
@@ -407,9 +384,7 @@ class ListsObjectTest {
     fun `test that parameter of the setter of field whose first level template type is not nullable, the template is marked as not nullable`(
         clazz: TypeDescription, fieldName: String
     ) {
-        val methodDescription = clazz.extractMatchingMethod(
-            fieldName, TestUtils.SchemaMethodType.SETTER
-        )
+        val methodDescription = clazz.extractMatchingMethod(fieldName, TestUtils.SchemaMethodType.SETTER)
         val parameter = methodDescription.parameters[0]
         val parameterTemplateTypeDescription = parameter.type
             .typeArguments[0]
@@ -442,8 +417,9 @@ class ListsObjectTest {
         clazz: TypeDescription, fieldName: String
     ) {
         val methodReturnTypeTemplateTypeDescription = clazz.extractMatchingMethod(
-            fieldName, TestUtils.SchemaMethodType.GETTER
-        ).returnType.typeArguments[0]
+            fieldName, TestUtils.SchemaMethodType.GETTER)
+            .returnType
+            .typeArguments[0]
 
         val annotations = methodReturnTypeTemplateTypeDescription.declaredAnnotations
 
@@ -455,9 +431,7 @@ class ListsObjectTest {
     fun `test that parameter of the setter of field whose first level template type is nullable, the template is marked as nullable`(
         clazz: TypeDescription, fieldName: String
     ) {
-        val methodDescription = clazz.extractMatchingMethod(
-            fieldName, TestUtils.SchemaMethodType.SETTER
-        )
+        val methodDescription = clazz.extractMatchingMethod(fieldName, TestUtils.SchemaMethodType.SETTER)
         val parameter = methodDescription.parameters[0]
         val parameterTemplateTypeDescription = parameter.type
             .typeArguments[0]
@@ -491,8 +465,10 @@ class ListsObjectTest {
         clazz: TypeDescription, fieldName: String
     ) {
         val methodReturnTypeSecondLevelTemplateTypeDescription = clazz.extractMatchingMethod(
-            fieldName, TestUtils.SchemaMethodType.GETTER
-        ).returnType.typeArguments[0].typeArguments[0]
+            fieldName, TestUtils.SchemaMethodType.GETTER)
+            .returnType
+            .typeArguments[0]
+            .typeArguments[0]
 
         val annotations = methodReturnTypeSecondLevelTemplateTypeDescription.declaredAnnotations
 
@@ -504,9 +480,7 @@ class ListsObjectTest {
     fun `test that parameter of the setter of field whose second level template type is not nullable, the template is marked as not nullable`(
         clazz: TypeDescription, fieldName: String
     ) {
-        val methodDescription = clazz.extractMatchingMethod(
-            fieldName, TestUtils.SchemaMethodType.SETTER
-        )
+        val methodDescription = clazz.extractMatchingMethod(fieldName, TestUtils.SchemaMethodType.SETTER)
         val parameter = methodDescription.parameters[0]
         val parameterSecondLevelTemplateTypeDescription = parameter.type
             .typeArguments[0]
@@ -541,8 +515,10 @@ class ListsObjectTest {
         clazz: TypeDescription, fieldName: String
     ) {
         val methodReturnTypeSecondLevelTemplateTypeDescription = clazz.extractMatchingMethod(
-            fieldName, TestUtils.SchemaMethodType.GETTER
-        ).returnType.typeArguments[0].typeArguments[0]
+            fieldName, TestUtils.SchemaMethodType.GETTER)
+            .returnType
+            .typeArguments[0]
+            .typeArguments[0]
 
         val annotations = methodReturnTypeSecondLevelTemplateTypeDescription.declaredAnnotations
 
@@ -554,9 +530,7 @@ class ListsObjectTest {
     fun `test that parameter of the setter of field whose second level template type is nullable, the template is marked as nullable`(
         clazz: TypeDescription, fieldName: String
     ) {
-        val methodDescription = clazz.extractMatchingMethod(
-            fieldName, TestUtils.SchemaMethodType.SETTER
-        )
+        val methodDescription = clazz.extractMatchingMethod(fieldName, TestUtils.SchemaMethodType.SETTER)
         val parameter = methodDescription.parameters[0]
         val parameterSecondLevelTemplateTypeDescription = parameter.type
             .typeArguments[0]
