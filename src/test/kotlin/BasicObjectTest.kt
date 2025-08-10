@@ -1,14 +1,6 @@
 import com.example.testsuite.BasicObject
-import net.bytebuddy.description.annotation.AnnotationList
-import net.bytebuddy.description.field.FieldDescription
-import net.bytebuddy.description.method.MethodDescription
 import net.bytebuddy.description.type.TypeDescription
-import net.bytebuddy.dynamic.ClassFileLocator
 import net.bytebuddy.matcher.ElementMatchers
-import net.bytebuddy.pool.TypePool
-import org.jetbrains.annotations.NotNull
-import org.jetbrains.annotations.Nullable
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.Test
@@ -16,14 +8,18 @@ import org.junit.jupiter.api.TestFactory
 import org.junit.jupiter.api.TestInfo
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
+import TestUtils.assertNullable
+import TestUtils.assertNotNullable
+import TestUtils.extractField
+import TestUtils.extractMatchingMethod
+import TestUtils.filterFieldsByName
+import TestUtils.filterMethodsByName
+import TestUtils.SchemaMethodType
 
 class BasicObjectTest {
 
     companion object {
         private const val SCHEMA_CLASS = "com.example.testsuite.BasicObject"
-        private const val SCHEMA_BUILDER_CLASS = "com.example.testsuite.BasicObject\$Builder"
-        private val NON_NULL_ANNOTATION_TYPE = TypeDescription.ForLoadedType(NotNull::class.java)
-        private val NULLABLE_ANNOTATION_TYPE = TypeDescription.ForLoadedType(Nullable::class.java)
 
         // Byte Buddy TypeDescription of our target class, loaded once for all tests
         private lateinit var schemaClass: TypeDescription
@@ -32,16 +28,9 @@ class BasicObjectTest {
         @JvmStatic
         @BeforeAll
         fun setUp() {
-            // When running tests via Gradle/Maven, the compiled classes are usually
-            // already on the system classpath. We can leverage this directly.
-            val locator = ClassFileLocator.ForClassLoader.ofSystemLoader()
-
-            // Create a TypePool to resolve type descriptions from the locator
-            val typePool = TypePool.Default.of(locator)
-
-            // Describe and resolve the target class
-            schemaClass = typePool.describe(SCHEMA_CLASS).resolve()
-            schemaBuilderClass = typePool.describe(SCHEMA_BUILDER_CLASS).resolve()
+            val (schema, schemaBuilder) = TestUtils.createTypeDescriptions(SCHEMA_CLASS)
+            schemaClass = schema
+            schemaBuilderClass = schemaBuilder
         }
 
         @JvmStatic
@@ -60,8 +49,7 @@ class BasicObjectTest {
 
     @TestFactory
     fun `test newBuilder methods are marked not nullable`(testInfo: TestInfo): List<DynamicTest> {
-        val newBuilderMethodsDescription = schemaClass.declaredMethods
-            .filter(ElementMatchers.named("newBuilder"))
+        val newBuilderMethodsDescription = schemaClass.filterMethodsByName("newBuilder")
 
         return newBuilderMethodsDescription.map {
             val annotations = it.declaredAnnotations
@@ -76,8 +64,7 @@ class BasicObjectTest {
 
     @TestFactory
     fun `test newBuilder methods parameter is marked nullable`(testInfo: TestInfo): List<DynamicTest> {
-        val copyBuilderMethodsDescription = schemaClass.declaredMethods
-            .filter(ElementMatchers.named("newBuilder"))
+        val copyBuilderMethodsDescription = schemaClass.filterMethodsByName("newBuilder")
             .filter(ElementMatchers.takesArguments(1))
 
         return copyBuilderMethodsDescription.map {
@@ -94,8 +81,7 @@ class BasicObjectTest {
 
     @Test
     fun `test that the build method of the builder is marked as not nullable`() {
-        val buildMethodDescription = schemaBuilderClass.declaredMethods
-            .filter(ElementMatchers.named("build"))
+        val buildMethodDescription = schemaBuilderClass.filterMethodsByName("build")
             /*
             * Note: Adding this filter because for unknown reason it had found 2 build methods, so I added additional
             *  filter so that only the actually used one will be tested.
@@ -442,61 +428,5 @@ class BasicObjectTest {
         val annotations = methodDescription.declaredAnnotations
 
         annotations.assertNotNullable()
-    }
-
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-
-    enum class SchemaMethodType {
-        GETTER,
-        SETTER,
-        CLEARER
-    }
-    
-    fun TypeDescription.extractField(fieldName: String): FieldDescription.InDefinedShape {
-        return this.declaredFields
-            .filter(ElementMatchers.named(fieldName))
-            .only
-    }
-
-    fun TypeDescription.extractMatchingMethod(fieldName: String, schemaMethodType: SchemaMethodType): MethodDescription.InDefinedShape {
-        val prefix = when (schemaMethodType) {
-            SchemaMethodType.GETTER -> "get"
-            SchemaMethodType.SETTER -> "set"
-            SchemaMethodType.CLEARER -> "clear"
-        }
-
-        val methodName = "${prefix}${fieldName[0].uppercase() + fieldName.substring(1)}"
-
-        return this.declaredMethods.filter(ElementMatchers.named(methodName))
-            .only
-    }
-
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-
-    fun AnnotationList.assertNullable() {
-        assertAnnotationsExtensionMethod(existingAnnotation = NULLABLE_ANNOTATION_TYPE, nonExistingAnnotation = NON_NULL_ANNOTATION_TYPE)
-    }
-
-    fun AnnotationList.assertNotNullable() {
-        assertAnnotationsExtensionMethod(existingAnnotation = NON_NULL_ANNOTATION_TYPE, nonExistingAnnotation = NULLABLE_ANNOTATION_TYPE)
-    }
-
-    fun AnnotationList.assertAnnotationsExtensionMethod(existingAnnotation: TypeDescription,
-                                                        nonExistingAnnotation: TypeDescription) {
-        assertAnnotations(this, existingAnnotation, nonExistingAnnotation)
-    }
-
-    fun assertAnnotations(
-        source: AnnotationList,
-        existingAnnotation: TypeDescription,
-        nonExistingAnnotation: TypeDescription
-    ) {
-        assertAll(
-            {
-                assertTrue(source.isAnnotationPresent(existingAnnotation)) { "${existingAnnotation.name} should be present" }
-            },
-            {
-                assertFalse(source.isAnnotationPresent(nonExistingAnnotation)) { "${nonExistingAnnotation.name} should not be present" }
-            })
     }
 }

@@ -1,14 +1,6 @@
 import com.example.testsuite.MapsObject
-import net.bytebuddy.description.annotation.AnnotationList
 import net.bytebuddy.description.type.TypeDescription
-import net.bytebuddy.dynamic.ClassFileLocator
 import net.bytebuddy.matcher.ElementMatchers
-import net.bytebuddy.pool.TypePool
-import org.jetbrains.annotations.NotNull
-import org.jetbrains.annotations.Nullable
-import org.junit.jupiter.api.Assertions.assertAll
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.Test
@@ -17,14 +9,20 @@ import org.junit.jupiter.api.TestInfo
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
+import TestUtils.assertNotNullable
+import TestUtils.assertNullable
+import TestUtils.extractMatchingMethod
+import TestUtils.filterFieldsByName
+import TestUtils.filterMethodsByName
+import TestUtils.NON_NULL_ANNOTATION_TYPE
+import TestUtils.NULLABLE_ANNOTATION_TYPE
+import TestUtils.assertAnnotations
+import org.junit.jupiter.api.assertAll
 
 class MapsObjectTest {
 
     companion object {
         private const val SCHEMA_CLASS = "com.example.testsuite.MapsObject"
-        private const val SCHEMA_BUILDER_CLASS = "com.example.testsuite.MapsObject\$Builder"
-        private val NON_NULL_ANNOTATION_TYPE = TypeDescription.ForLoadedType(NotNull::class.java)
-        private val NULLABLE_ANNOTATION_TYPE = TypeDescription.ForLoadedType(Nullable::class.java)
 
         // Byte Buddy TypeDescription of our target class, loaded once for all tests
         private lateinit var schemaClass: TypeDescription
@@ -33,16 +31,9 @@ class MapsObjectTest {
         @JvmStatic
         @BeforeAll
         fun setUp() {
-            // When running tests via Gradle/Maven, the compiled classes are usually
-            // already on the system classpath. We can leverage this directly.
-            val locator = ClassFileLocator.ForClassLoader.ofSystemLoader()
-
-            // Create a TypePool to resolve type descriptions from the locator
-            val typePool = TypePool.Default.of(locator)
-
-            // Describe and resolve the target class
-            schemaClass = typePool.describe(SCHEMA_CLASS).resolve()
-            schemaBuilderClass = typePool.describe(SCHEMA_BUILDER_CLASS).resolve()
+            val (schema, schemaBuilder) = TestUtils.createTypeDescriptions(SCHEMA_CLASS)
+            schemaClass = schema
+            schemaBuilderClass = schemaBuilder
         }
 
         @JvmStatic
@@ -143,8 +134,7 @@ class MapsObjectTest {
 
     @TestFactory
     fun `test newBuilder methods are marked not nullable`(testInfo: TestInfo): List<DynamicTest> {
-        val newBuilderMethodsDescription = schemaClass.declaredMethods
-            .filter(ElementMatchers.named("newBuilder"))
+        val newBuilderMethodsDescription = schemaClass.filterMethodsByName("newBuilder")
 
         return newBuilderMethodsDescription.map {
             val annotations = it.declaredAnnotations
@@ -152,19 +142,14 @@ class MapsObjectTest {
             DynamicTest.dynamicTest(
                 "[${testInfo.displayName}] - method with the parameter ${it.parameters}"
             ) {
-                assertAnnotations(
-                    annotations,
-                    existingAnnotation = NON_NULL_ANNOTATION_TYPE,
-                    nonExistingAnnotation = NULLABLE_ANNOTATION_TYPE
-                )
+                annotations.assertNotNullable()
             }
         }.toList()
     }
 
     @TestFactory
     fun `test newBuilder methods parameter is marked nullable`(testInfo: TestInfo): List<DynamicTest> {
-        val copyBuilderMethodsDescription = schemaClass.declaredMethods
-            .filter(ElementMatchers.named("newBuilder"))
+        val copyBuilderMethodsDescription = schemaClass.filterMethodsByName("newBuilder")
             .filter(ElementMatchers.takesArguments(1))
 
         return copyBuilderMethodsDescription.map {
@@ -174,19 +159,14 @@ class MapsObjectTest {
             DynamicTest.dynamicTest(
                 "[${testInfo.displayName}] - method with the parameter ${it.parameters}"
             ) {
-                assertAnnotations(
-                    annotations,
-                    existingAnnotation = NULLABLE_ANNOTATION_TYPE,
-                    nonExistingAnnotation = NON_NULL_ANNOTATION_TYPE
-                )
+                annotations.assertNullable()
             }
         }.toList()
     }
 
     @Test
     fun `test that the build method of the builder is marked as not nullable`() {
-        val buildMethodDescription = schemaBuilderClass.declaredMethods
-            .filter(ElementMatchers.named("build"))
+        val buildMethodDescription = schemaBuilderClass.filterMethodsByName("build")
             /*
             * Note: Adding this filter because for unknown reason it had found 2 build methods, so I added additional
             *  filter so that only the actually used one will be tested.
@@ -196,11 +176,7 @@ class MapsObjectTest {
 
         val annotations = buildMethodDescription.declaredAnnotations
 
-        assertAnnotations(
-            annotations,
-            existingAnnotation = NON_NULL_ANNOTATION_TYPE,
-            nonExistingAnnotation = NULLABLE_ANNOTATION_TYPE
-        )
+        annotations.assertNotNullable()
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////
@@ -209,137 +185,85 @@ class MapsObjectTest {
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
     @MethodSource("mapFieldsOfSchema")
     fun `test map field is marked as not nullable in the schema`(fieldName: String) {
-        val fieldDescription = schemaClass.declaredFields
-            .filter(ElementMatchers.named(fieldName))
+        val fieldDescription = schemaClass.filterFieldsByName(fieldName)
             .only
 
         val annotations = fieldDescription.declaredAnnotations
 
-        assertAnnotations(
-            annotations,
-            existingAnnotation = NON_NULL_ANNOTATION_TYPE,
-            nonExistingAnnotation = NULLABLE_ANNOTATION_TYPE
-        )
+        annotations.assertNotNullable()
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
     @MethodSource("mapFieldsOfSchema")
     fun `test map field is still marked as nullable in the builder`(fieldName: String) {
-        val fieldDescription = schemaBuilderClass.declaredFields
-            .filter(ElementMatchers.named(fieldName))
+        val fieldDescription = schemaBuilderClass.filterFieldsByName(fieldName)
             .only
 
         val annotations = fieldDescription.declaredAnnotations
 
-        assertAnnotations(
-            annotations,
-            existingAnnotation = NULLABLE_ANNOTATION_TYPE,
-            nonExistingAnnotation = NON_NULL_ANNOTATION_TYPE
-        )
+        annotations.assertNullable()
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
     @MethodSource("mapFieldsOfSchema")
     fun `test map field getter method is marked as not nullable in the schema`(fieldName: String) {
-        val methodName = "get${fieldName[0].uppercase() + fieldName.substring(1)}"
-        val methodDescription = schemaClass.declaredMethods
-            .filter(ElementMatchers.named(methodName))
-            .only
+        val methodDescription = schemaClass.extractMatchingMethod(fieldName, TestUtils.SchemaMethodType.GETTER)
 
         val annotations = methodDescription.declaredAnnotations
 
-        assertAnnotations(
-            annotations,
-            existingAnnotation = NON_NULL_ANNOTATION_TYPE,
-            nonExistingAnnotation = NULLABLE_ANNOTATION_TYPE
-        )
+        annotations.assertNotNullable()
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
     @MethodSource("mapFieldsOfSchema")
     fun `test map field getter method is still marked as nullable in the builder`(fieldName: String) {
-        val methodName = "get${fieldName[0].uppercase() + fieldName.substring(1)}"
-        val methodDescription = schemaBuilderClass.declaredMethods
-            .filter(ElementMatchers.named(methodName))
-            .only
+        val methodDescription = schemaBuilderClass.extractMatchingMethod(fieldName, TestUtils.SchemaMethodType.GETTER)
 
         val annotations = methodDescription.declaredAnnotations
 
-        assertAnnotations(
-            annotations,
-            existingAnnotation = NULLABLE_ANNOTATION_TYPE,
-            nonExistingAnnotation = NON_NULL_ANNOTATION_TYPE
-        )
+        annotations.assertNullable()
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
     @MethodSource("mapFieldsOfSchema")
     fun `test map field setter method parameter is marked as not nullable in the schema`(fieldName: String) {
-        val methodName = "set${fieldName[0].uppercase() + fieldName.substring(1)}"
-        val methodDescription = schemaClass.declaredMethods
-            .filter(ElementMatchers.named(methodName))
-            .only
+        val methodDescription = schemaClass.extractMatchingMethod(fieldName, TestUtils.SchemaMethodType.SETTER)
         val parameter = methodDescription.parameters[0]
 
         val annotations = parameter.declaredAnnotations
 
-        assertAnnotations(
-            annotations,
-            existingAnnotation = NON_NULL_ANNOTATION_TYPE,
-            nonExistingAnnotation = NULLABLE_ANNOTATION_TYPE
-        )
+        annotations.assertNotNullable()
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
     @MethodSource("mapFieldsOfSchema")
     fun `test map field setter method parameter is marked as not nullable in the builder`(fieldName: String) {
-        val methodName = "set${fieldName[0].uppercase() + fieldName.substring(1)}"
-        val methodDescription = schemaBuilderClass.declaredMethods
-            .filter(ElementMatchers.named(methodName))
-            .only
+        val methodDescription = schemaBuilderClass.extractMatchingMethod(fieldName, TestUtils.SchemaMethodType.SETTER)
         val parameter = methodDescription.parameters[0]
 
         val annotations = parameter.declaredAnnotations
 
-        assertAnnotations(
-            annotations,
-            existingAnnotation = NON_NULL_ANNOTATION_TYPE,
-            nonExistingAnnotation = NULLABLE_ANNOTATION_TYPE
-        )
+        annotations.assertNotNullable()
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
     @MethodSource("mapFieldsOfSchema")
     fun `test map field setter method is marked as not nullable in the builder`(fieldName: String) {
-        val methodName = "set${fieldName[0].uppercase() + fieldName.substring(1)}"
-        val methodDescription = schemaBuilderClass.declaredMethods
-            .filter(ElementMatchers.named(methodName))
-            .only
+        val methodDescription = schemaBuilderClass.extractMatchingMethod(fieldName, TestUtils.SchemaMethodType.SETTER)
 
         val annotations = methodDescription.declaredAnnotations
 
-        assertAnnotations(
-            annotations,
-            existingAnnotation = NON_NULL_ANNOTATION_TYPE,
-            nonExistingAnnotation = NULLABLE_ANNOTATION_TYPE
-        )
+        annotations.assertNotNullable()
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
     @MethodSource("mapFieldsOfSchema")
     fun `test map field clear method is marked as not nullable in the builder`(fieldName: String) {
-        val methodName = "clear${fieldName[0].uppercase() + fieldName.substring(1)}"
-        val methodDescription = schemaBuilderClass.declaredMethods
-            .filter(ElementMatchers.named(methodName))
-            .only
+        val methodDescription = schemaBuilderClass.extractMatchingMethod(fieldName, TestUtils.SchemaMethodType.CLEARER)
 
         val annotations = methodDescription.declaredAnnotations
 
-        assertAnnotations(
-            annotations,
-            existingAnnotation = NON_NULL_ANNOTATION_TYPE,
-            nonExistingAnnotation = NULLABLE_ANNOTATION_TYPE
-        )
+        annotations.assertNotNullable()
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////
@@ -347,137 +271,87 @@ class MapsObjectTest {
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
     @MethodSource("nullableMapFieldsOfSchema")
     fun `test nullable map field is marked as nullable in the schema`(fieldName: String) {
-        val fieldDescription = schemaClass.declaredFields
-            .filter(ElementMatchers.named(fieldName))
+        val fieldDescription = schemaClass.filterFieldsByName(fieldName)
             .only
 
         val annotations = fieldDescription.declaredAnnotations
 
-        assertAnnotations(
-            annotations,
-            existingAnnotation = NULLABLE_ANNOTATION_TYPE,
-            nonExistingAnnotation = NON_NULL_ANNOTATION_TYPE
-        )
+        annotations.assertNullable()
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
     @MethodSource("nullableMapFieldsOfSchema")
     fun `test nullable map field is marked as nullable in the builder`(fieldName: String) {
-        val fieldDescription = schemaBuilderClass.declaredFields
-            .filter(ElementMatchers.named(fieldName))
+        val fieldDescription = schemaBuilderClass.filterFieldsByName(fieldName)
             .only
 
         val annotations = fieldDescription.declaredAnnotations
 
-        assertAnnotations(
-            annotations,
-            existingAnnotation = NULLABLE_ANNOTATION_TYPE,
-            nonExistingAnnotation = NON_NULL_ANNOTATION_TYPE
-        )
+        annotations.assertNullable()
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
     @MethodSource("nullableMapFieldsOfSchema")
     fun `test nullable map field getter method is marked as nullable in the schema`(fieldName: String) {
-        val methodName = "get${fieldName[0].uppercase() + fieldName.substring(1)}"
-        val methodDescription = schemaClass.declaredMethods
-            .filter(ElementMatchers.named(methodName))
-            .only
+        val methodDescription = schemaClass.extractMatchingMethod(fieldName, TestUtils.SchemaMethodType.GETTER)
 
         val annotations = methodDescription.declaredAnnotations
 
-        assertAnnotations(
-            annotations,
-            existingAnnotation = NULLABLE_ANNOTATION_TYPE,
-            nonExistingAnnotation = NON_NULL_ANNOTATION_TYPE
-        )
+        annotations.assertNullable()
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
     @MethodSource("nullableMapFieldsOfSchema")
     fun `test nullable map field getter method is marked as nullable in the builder`(fieldName: String) {
-        val methodName = "get${fieldName[0].uppercase() + fieldName.substring(1)}"
-        val methodDescription = schemaBuilderClass.declaredMethods
-            .filter(ElementMatchers.named(methodName))
-            .only
+        val methodDescription = schemaBuilderClass.extractMatchingMethod(fieldName, TestUtils.SchemaMethodType.GETTER)
 
         val annotations = methodDescription.declaredAnnotations
 
-        assertAnnotations(
-            annotations,
-            existingAnnotation = NULLABLE_ANNOTATION_TYPE,
-            nonExistingAnnotation = NON_NULL_ANNOTATION_TYPE
-        )
+        annotations.assertNullable()
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
     @MethodSource("nullableMapFieldsOfSchema")
     fun `test nullable map field setter method parameter is marked as nullable in the schema`(fieldName: String) {
-        val methodName = "set${fieldName[0].uppercase() + fieldName.substring(1)}"
-        val methodDescription = schemaClass.declaredMethods
-            .filter(ElementMatchers.named(methodName))
-            .only
+        val methodDescription = schemaClass.extractMatchingMethod(fieldName, TestUtils.SchemaMethodType.SETTER)
         val parameter = methodDescription.parameters[0]
 
         val annotations = parameter.declaredAnnotations
 
-        assertAnnotations(
-            annotations,
-            existingAnnotation = NULLABLE_ANNOTATION_TYPE,
-            nonExistingAnnotation = NON_NULL_ANNOTATION_TYPE
-        )
+        annotations.assertNullable()
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
     @MethodSource("nullableMapFieldsOfSchema")
     fun `test nullable map field setter method parameter is marked as nullable in the builder`(fieldName: String) {
-        val methodName = "set${fieldName[0].uppercase() + fieldName.substring(1)}"
-        val methodDescription = schemaBuilderClass.declaredMethods
-            .filter(ElementMatchers.named(methodName))
-            .only
+        val methodDescription = schemaBuilderClass.extractMatchingMethod(fieldName, TestUtils.SchemaMethodType.SETTER)
         val parameter = methodDescription.parameters[0]
 
         val annotations = parameter.declaredAnnotations
 
-        assertAnnotations(
-            annotations,
-            existingAnnotation = NULLABLE_ANNOTATION_TYPE,
-            nonExistingAnnotation = NON_NULL_ANNOTATION_TYPE
-        )
+        annotations.assertNullable()
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
     @MethodSource("nullableMapFieldsOfSchema")
     fun `test nullable map field setter method is marked as not nullable in the builder`(fieldName: String) {
-        val methodName = "set${fieldName[0].uppercase() + fieldName.substring(1)}"
-        val methodDescription = schemaBuilderClass.declaredMethods
-            .filter(ElementMatchers.named(methodName))
-            .only
+        val methodDescription = schemaBuilderClass.extractMatchingMethod(fieldName, TestUtils.SchemaMethodType.SETTER)
 
         val annotations = methodDescription.declaredAnnotations
 
-        assertAnnotations(
-            annotations,
-            existingAnnotation = NON_NULL_ANNOTATION_TYPE,
-            nonExistingAnnotation = NULLABLE_ANNOTATION_TYPE
-        )
+        annotations.assertNotNullable()
     }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
     @MethodSource("nullableMapFieldsOfSchema")
     fun `test nullable map field clear method is marked as not nullable in the builder`(fieldName: String) {
-        val methodName = "clear${fieldName[0].uppercase() + fieldName.substring(1)}"
-        val methodDescription = schemaBuilderClass.declaredMethods
-            .filter(ElementMatchers.named(methodName))
-            .only
+        val methodDescription = schemaBuilderClass.extractMatchingMethod(
+            fieldName, TestUtils.SchemaMethodType.CLEARER
+        )
 
         val annotations = methodDescription.declaredAnnotations
 
-        assertAnnotations(
-            annotations,
-            existingAnnotation = NON_NULL_ANNOTATION_TYPE,
-            nonExistingAnnotation = NULLABLE_ANNOTATION_TYPE
-        )
+        annotations.assertNotNullable()
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -487,69 +361,177 @@ class MapsObjectTest {
     fun `test that field whose first level value template type is not nullable, the template value is marked as not nullable while the keys are marked as not nullable`(
         clazz: TypeDescription, fieldName: String
     ) {
-        val fieldTypeDescription = clazz.declaredFields
-            .filter(ElementMatchers.named(fieldName))
+        val fieldTypeDescription = clazz.filterFieldsByName(fieldName)
             .only
             .type
 
-        assertTemplateAnnotations(
-            fieldTypeDescription,
-            existingAnnotation = NON_NULL_ANNOTATION_TYPE,
-            nonExistingAnnotation = NULLABLE_ANNOTATION_TYPE
-        )
+        fieldTypeDescription.assertTemplateAnnotationsForNotNullValues()
     }
 
     @ParameterizedTest(name = "[{displayName}] - for class {0}, for field: {1}")
     @MethodSource("classWithRegularFirstLevelTemplate")
-    fun `test that getter of field whose first level value template type is not nullable, the template is marked as not nullable while the keys are marked as not nullable`(
+    fun `test that getter of field whose first level value template type is not nullable, the template value is marked as not nullable while the keys are marked as not nullable`(
         clazz: TypeDescription, fieldName: String
     ) {
-        val methodName = "get${fieldName[0].uppercase() + fieldName.substring(1)}"
-        val methodReturnTypeTypeDescription = clazz.declaredMethods
-            .filter(ElementMatchers.named(methodName))
-            .only
+        val methodReturnTypeTypeDescription = clazz.extractMatchingMethod(fieldName, TestUtils.SchemaMethodType.GETTER)
             .returnType
 
-        assertTemplateAnnotations(
-            methodReturnTypeTypeDescription,
-            existingAnnotation = NON_NULL_ANNOTATION_TYPE,
-            nonExistingAnnotation = NULLABLE_ANNOTATION_TYPE
-        )
+        methodReturnTypeTypeDescription.assertTemplateAnnotationsForNotNullValues()
     }
 
     @ParameterizedTest(name = "[{displayName}] - for class {0}, for field: {1}")
     @MethodSource("classWithRegularFirstLevelTemplate")
-    fun `test that parameter of the setter of field whose first level value template type is not nullable, the template is marked as not nullable while the keys are marked as not nullable`(
+    fun `test that parameter of the setter of field whose first level value template type is not nullable, the template value is marked as not nullable while the keys are marked as not nullable`(
         clazz: TypeDescription, fieldName: String
     ) {
-        val methodName = "set${fieldName[0].uppercase() + fieldName.substring(1)}"
-        val methodDescription = clazz.declaredMethods
-            .filter(ElementMatchers.named(methodName))
-            .only
+        val methodDescription = clazz.extractMatchingMethod(fieldName, TestUtils.SchemaMethodType.SETTER)
         val parameter = methodDescription.parameters[0]
         val parameterTypeDescription = parameter.type
 
-        assertTemplateAnnotations(
-            parameterTypeDescription,
-            existingAnnotation = NON_NULL_ANNOTATION_TYPE,
-            nonExistingAnnotation = NULLABLE_ANNOTATION_TYPE
-        )
+        parameterTypeDescription.assertTemplateAnnotationsForNotNullValues()
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////
 
-    fun assertTemplateAnnotations(
-        source: TypeDescription.Generic,
+    @ParameterizedTest(name = "[{displayName}] - for class {0}, for field: {1}")
+    @MethodSource("classWithNullableFirstLevelTemplate")
+    fun `test that field whose first level value template type is nullable, the template value is marked as nullable while the keys are marked as not nullable`(
+        clazz: TypeDescription, fieldName: String
+    ) {
+        val fieldTypeDescription = clazz.filterFieldsByName(fieldName)
+            .only
+            .type
+
+        fieldTypeDescription.assertTemplateAnnotationsForNullableValues()
+    }
+
+    @ParameterizedTest(name = "[{displayName}] - for class {0}, for field: {1}")
+    @MethodSource("classWithNullableFirstLevelTemplate")
+    fun `test that getter of field whose first level value template type is nullable, the template value is marked as nullable while the keys are marked as not nullable`(
+        clazz: TypeDescription, fieldName: String
+    ) {
+        val methodReturnTypeTypeDescription = clazz.extractMatchingMethod(fieldName, TestUtils.SchemaMethodType.GETTER)
+            .returnType
+
+        methodReturnTypeTypeDescription.assertTemplateAnnotationsForNullableValues()
+    }
+
+    @ParameterizedTest(name = "[{displayName}] - for class {0}, for field: {1}")
+    @MethodSource("classWithNullableFirstLevelTemplate")
+    fun `test that parameter of the setter of field whose first level value template type is nullable, the template value is marked as nullable while the keys are marked as not nullable`(
+        clazz: TypeDescription, fieldName: String
+    ) {
+        val methodDescription = clazz.extractMatchingMethod(fieldName, TestUtils.SchemaMethodType.SETTER)
+        val parameter = methodDescription.parameters[0]
+        val parameterTypeDescription = parameter.type
+
+        parameterTypeDescription.assertTemplateAnnotationsForNullableValues()
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////
+
+    @ParameterizedTest(name = "[{displayName}] - for class {0}, for field: {1}")
+    @MethodSource("classWithRegularSecondLevelTemplate")
+    fun `test that field whose second level value template type is not nullable, the template value is marked as not nullable while the keys are marked as not nullable`(
+        clazz: TypeDescription, fieldName: String
+    ) {
+        val fieldTypeDescription = clazz.filterFieldsByName(fieldName)
+            .only
+            .type
+            .typeArguments[1]
+
+        fieldTypeDescription.assertTemplateAnnotationsForNotNullValues()
+    }
+
+    @ParameterizedTest(name = "[{displayName}] - for class {0}, for field: {1}")
+    @MethodSource("classWithRegularSecondLevelTemplate")
+    fun `test that getter of field whose second level value template type is not nullable, the template value is marked as not nullable while the keys are marked as not nullable`(
+        clazz: TypeDescription, fieldName: String
+    ) {
+        val methodReturnTypeTypeDescription = clazz.extractMatchingMethod(fieldName, TestUtils.SchemaMethodType.GETTER)
+            .returnType
+            .typeArguments[1]
+
+        methodReturnTypeTypeDescription.assertTemplateAnnotationsForNotNullValues()
+    }
+
+    @ParameterizedTest(name = "[{displayName}] - for class {0}, for field: {1}")
+    @MethodSource("classWithRegularSecondLevelTemplate")
+    fun `test that parameter of the setter of field whose second level value template type is not nullable, the template value is marked as not nullable while the keys are marked as not nullable`(
+        clazz: TypeDescription, fieldName: String
+    ) {
+        val methodDescription = clazz.extractMatchingMethod(fieldName, TestUtils.SchemaMethodType.SETTER)
+        val parameter = methodDescription.parameters[0]
+        val parameterTypeDescription = parameter.type.typeArguments[1]
+
+        parameterTypeDescription.assertTemplateAnnotationsForNotNullValues()
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////
+
+    @ParameterizedTest(name = "[{displayName}] - for class {0}, for field: {1}")
+    @MethodSource("classWithNullableSecondLevelTemplate")
+    fun `test that field whose second level value template type is nullable, the template value is marked as nullable while the keys are marked as not nullable`(
+        clazz: TypeDescription, fieldName: String
+    ) {
+        val fieldTypeDescription = clazz.filterFieldsByName(fieldName)
+            .only
+            .type
+            .typeArguments[1]
+
+        fieldTypeDescription.assertTemplateAnnotationsForNullableValues()
+    }
+
+    @ParameterizedTest(name = "[{displayName}] - for class {0}, for field: {1}")
+    @MethodSource("classWithNullableSecondLevelTemplate")
+    fun `test that getter of field whose second level value template type is nullable, the template value is marked as nullable while the keys are marked as not nullable`(
+        clazz: TypeDescription, fieldName: String
+    ) {
+        val methodReturnTypeTypeDescription = clazz.extractMatchingMethod(fieldName, TestUtils.SchemaMethodType.GETTER)
+            .returnType
+            .typeArguments[1]
+
+        methodReturnTypeTypeDescription.assertTemplateAnnotationsForNullableValues()
+    }
+
+    @ParameterizedTest(name = "[{displayName}] - for class {0}, for field: {1}")
+    @MethodSource("classWithNullableSecondLevelTemplate")
+    fun `test that parameter of the setter of field whose second level value template type is nullable, the template value is marked as nullable while the keys are marked as not nullable`(
+        clazz: TypeDescription, fieldName: String
+    ) {
+        val methodDescription = clazz.extractMatchingMethod(fieldName, TestUtils.SchemaMethodType.SETTER)
+        val parameter = methodDescription.parameters[0]
+        val parameterTypeDescription = parameter.type.typeArguments[1]
+
+        parameterTypeDescription.assertTemplateAnnotationsForNullableValues()
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////
+
+    fun TypeDescription.Generic.assertTemplateAnnotationsForNullableValues() {
+        assertTemplateAnnotations(
+            existingAnnotation = NULLABLE_ANNOTATION_TYPE,
+            nonExistingAnnotation = NON_NULL_ANNOTATION_TYPE
+        )
+    }
+
+    fun TypeDescription.Generic.assertTemplateAnnotationsForNotNullValues() {
+        assertTemplateAnnotations(
+            existingAnnotation = NON_NULL_ANNOTATION_TYPE,
+            nonExistingAnnotation = NULLABLE_ANNOTATION_TYPE
+        )
+    }
+
+    fun TypeDescription.Generic.assertTemplateAnnotations(
         existingAnnotation: TypeDescription,
         nonExistingAnnotation: TypeDescription
     ) {
         assertAll(
             {
-                assertForKeyTemplate(source)
+                assertForKeyTemplate()
             },
             {
                 assertForValueTemplate(
-                    source,
                     existingAnnotation = existingAnnotation,
                     nonExistingAnnotation = nonExistingAnnotation
                 )
@@ -557,29 +539,21 @@ class MapsObjectTest {
         )
     }
 
-    fun assertForKeyTemplate(
-        source: TypeDescription.Generic
-    ) {
-        val keyTemplateAnnotations = source.typeArguments[0].declaredAnnotations
+    fun TypeDescription.Generic.assertForKeyTemplate() {
+        val keyTemplateAnnotations = typeArguments[0].declaredAnnotations
 
         assertAll(
             "Key annotations assertions",
             {
-                assertAnnotations(
-                    keyTemplateAnnotations,
-                    existingAnnotation = NON_NULL_ANNOTATION_TYPE,
-                    nonExistingAnnotation = NULLABLE_ANNOTATION_TYPE
-                )
+                keyTemplateAnnotations.assertNotNullable()
             })
-
     }
 
-    fun assertForValueTemplate(
-        source: TypeDescription.Generic,
+    fun TypeDescription.Generic.assertForValueTemplate(
         existingAnnotation: TypeDescription,
         nonExistingAnnotation: TypeDescription
     ) {
-        val valueTemplateAnnotations = source.typeArguments[1].declaredAnnotations
+        val valueTemplateAnnotations = typeArguments[1].declaredAnnotations
 
         assertAll(
             "Value annotations assertions",
@@ -589,20 +563,6 @@ class MapsObjectTest {
                     existingAnnotation = existingAnnotation,
                     nonExistingAnnotation = nonExistingAnnotation
                 )
-            })
-    }
-
-    fun assertAnnotations(
-        source: AnnotationList,
-        existingAnnotation: TypeDescription,
-        nonExistingAnnotation: TypeDescription
-    ) {
-        assertAll(
-            {
-                assertTrue(source.isAnnotationPresent(existingAnnotation)) { "${existingAnnotation.name} should be present" }
-            },
-            {
-                assertFalse(source.isAnnotationPresent(nonExistingAnnotation)) { "${nonExistingAnnotation.name} should not be present" }
             })
     }
 }
