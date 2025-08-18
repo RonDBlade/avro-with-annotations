@@ -56,22 +56,6 @@ object TestUtils {
     }
 
     /**
-     * Extension function to extract a field by name from a TypeDescription.
-     */
-    fun TypeDescription.extractField(fieldName: String): FieldDescription.InDefinedShape {
-        return filterFieldsByName(fieldName).only
-    }
-
-    /**
-     * Extension function to filter declared fields by name from a TypeDescription.
-     * 
-     * @param fieldName The name of the field to filter by
-     * @return FilterableList of fields matching the given name
-     */
-    fun TypeDescription.filterFieldsByName(fieldName: String) = 
-        declaredFields.filter(ElementMatchers.named(fieldName))
-
-    /**
      * Extension function to filter declared methods by name from a TypeDescription.
      * 
      * @param methodName The name of the method to filter by

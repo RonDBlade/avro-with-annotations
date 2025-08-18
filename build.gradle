@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'org.jetbrains.kotlin.jvm' version '1.9.22'
+    id("org.jetbrains.kotlin.plugin.lombok") version '1.9.22'
     id 'com.github.davidmc24.gradle.plugin.avro' version '1.9.1'
 }
 
@@ -28,6 +29,11 @@ dependencies {
     implementation 'com.github.javaparser:javaparser-core:3.25.5'
     compileOnly 'org.jetbrains:annotations:24.1.0'
     annotationProcessor 'org.jetbrains:annotations:24.1.0'
+    implementation("org.jspecify:jspecify:1.0.0")
+
+
+    compileOnly 'org.projectlombok:lombok:1.18.20'
+    annotationProcessor 'org.projectlombok:lombok:1.18.20'
     
     // Add dependencies to the Avro configuration
     avroDeps 'org.jetbrains:annotations:24.1.0'

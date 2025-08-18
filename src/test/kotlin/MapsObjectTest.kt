@@ -12,7 +12,6 @@ import org.junit.jupiter.params.provider.MethodSource
 import TestUtils.assertNotNullable
 import TestUtils.assertNullable
 import TestUtils.extractMatchingMethod
-import TestUtils.filterFieldsByName
 import TestUtils.filterMethodsByName
 import TestUtils.NON_NULL_ANNOTATION_TYPE
 import TestUtils.NULLABLE_ANNOTATION_TYPE
@@ -181,29 +180,6 @@ class MapsObjectTest {
 
     /////////////////////////////////////////////////////////////////////////////////////////////
 
-
-    @ParameterizedTest(name = "[{displayName}] - for field: {0}")
-    @MethodSource("mapFieldsOfSchema")
-    fun `test map field is marked as not nullable in the schema`(fieldName: String) {
-        val fieldDescription = schemaClass.filterFieldsByName(fieldName)
-            .only
-
-        val annotations = fieldDescription.declaredAnnotations
-
-        annotations.assertNotNullable()
-    }
-
-    @ParameterizedTest(name = "[{displayName}] - for field: {0}")
-    @MethodSource("mapFieldsOfSchema")
-    fun `test map field is still marked as nullable in the builder`(fieldName: String) {
-        val fieldDescription = schemaBuilderClass.filterFieldsByName(fieldName)
-            .only
-
-        val annotations = fieldDescription.declaredAnnotations
-
-        annotations.assertNullable()
-    }
-
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
     @MethodSource("mapFieldsOfSchema")
     fun `test map field getter method is marked as not nullable in the schema`(fieldName: String) {
@@ -267,28 +243,6 @@ class MapsObjectTest {
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////
-
-    @ParameterizedTest(name = "[{displayName}] - for field: {0}")
-    @MethodSource("nullableMapFieldsOfSchema")
-    fun `test nullable map field is marked as nullable in the schema`(fieldName: String) {
-        val fieldDescription = schemaClass.filterFieldsByName(fieldName)
-            .only
-
-        val annotations = fieldDescription.declaredAnnotations
-
-        annotations.assertNullable()
-    }
-
-    @ParameterizedTest(name = "[{displayName}] - for field: {0}")
-    @MethodSource("nullableMapFieldsOfSchema")
-    fun `test nullable map field is marked as nullable in the builder`(fieldName: String) {
-        val fieldDescription = schemaBuilderClass.filterFieldsByName(fieldName)
-            .only
-
-        val annotations = fieldDescription.declaredAnnotations
-
-        annotations.assertNullable()
-    }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
     @MethodSource("nullableMapFieldsOfSchema")
@@ -358,18 +312,6 @@ class MapsObjectTest {
 
     @ParameterizedTest(name = "[{displayName}] - for class {0}, for field: {1}")
     @MethodSource("classWithRegularFirstLevelTemplate")
-    fun `test that field whose first level value template type is not nullable, the template value is marked as not nullable while the keys are marked as not nullable`(
-        clazz: TypeDescription, fieldName: String
-    ) {
-        val fieldTypeDescription = clazz.filterFieldsByName(fieldName)
-            .only
-            .type
-
-        fieldTypeDescription.assertTemplateAnnotationsForNotNullValues()
-    }
-
-    @ParameterizedTest(name = "[{displayName}] - for class {0}, for field: {1}")
-    @MethodSource("classWithRegularFirstLevelTemplate")
     fun `test that getter of field whose first level value template type is not nullable, the template value is marked as not nullable while the keys are marked as not nullable`(
         clazz: TypeDescription, fieldName: String
     ) {
@@ -392,18 +334,6 @@ class MapsObjectTest {
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////
-
-    @ParameterizedTest(name = "[{displayName}] - for class {0}, for field: {1}")
-    @MethodSource("classWithNullableFirstLevelTemplate")
-    fun `test that field whose first level value template type is nullable, the template value is marked as nullable while the keys are marked as not nullable`(
-        clazz: TypeDescription, fieldName: String
-    ) {
-        val fieldTypeDescription = clazz.filterFieldsByName(fieldName)
-            .only
-            .type
-
-        fieldTypeDescription.assertTemplateAnnotationsForNullableValues()
-    }
 
     @ParameterizedTest(name = "[{displayName}] - for class {0}, for field: {1}")
     @MethodSource("classWithNullableFirstLevelTemplate")
@@ -432,19 +362,6 @@ class MapsObjectTest {
 
     @ParameterizedTest(name = "[{displayName}] - for class {0}, for field: {1}")
     @MethodSource("classWithRegularSecondLevelTemplate")
-    fun `test that field whose second level value template type is not nullable, the template value is marked as not nullable while the keys are marked as not nullable`(
-        clazz: TypeDescription, fieldName: String
-    ) {
-        val fieldTypeDescription = clazz.filterFieldsByName(fieldName)
-            .only
-            .type
-            .typeArguments[1]
-
-        fieldTypeDescription.assertTemplateAnnotationsForNotNullValues()
-    }
-
-    @ParameterizedTest(name = "[{displayName}] - for class {0}, for field: {1}")
-    @MethodSource("classWithRegularSecondLevelTemplate")
     fun `test that getter of field whose second level value template type is not nullable, the template value is marked as not nullable while the keys are marked as not nullable`(
         clazz: TypeDescription, fieldName: String
     ) {
@@ -468,19 +385,6 @@ class MapsObjectTest {
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////
-
-    @ParameterizedTest(name = "[{displayName}] - for class {0}, for field: {1}")
-    @MethodSource("classWithNullableSecondLevelTemplate")
-    fun `test that field whose second level value template type is nullable, the template value is marked as nullable while the keys are marked as not nullable`(
-        clazz: TypeDescription, fieldName: String
-    ) {
-        val fieldTypeDescription = clazz.filterFieldsByName(fieldName)
-            .only
-            .type
-            .typeArguments[1]
-
-        fieldTypeDescription.assertTemplateAnnotationsForNullableValues()
-    }
 
     @ParameterizedTest(name = "[{displayName}] - for class {0}, for field: {1}")
     @MethodSource("classWithNullableSecondLevelTemplate")

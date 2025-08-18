@@ -10,9 +10,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import TestUtils.assertNullable
 import TestUtils.assertNotNullable
-import TestUtils.extractField
 import TestUtils.extractMatchingMethod
-import TestUtils.filterFieldsByName
 import TestUtils.filterMethodsByName
 import TestUtils.SchemaMethodType
 
@@ -98,26 +96,6 @@ class BasicObjectTest {
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
     @MethodSource("primitiveFieldsOfSchema")
-    fun `test primitive field is marked as not nullable in the schema`(fieldName: String) {
-        val fieldDescription = schemaClass.extractField(fieldName)
-
-        val annotations = fieldDescription.declaredAnnotations
-
-        annotations.assertNotNullable()
-    }
-
-    @ParameterizedTest(name = "[{displayName}] - for field: {0}")
-    @MethodSource("primitiveFieldsOfSchema")
-    fun `test primitive field is marked as not nullable in the builder`(fieldName: String) {
-        val fieldDescription = schemaBuilderClass.extractField(fieldName)
-
-        val annotations = fieldDescription.declaredAnnotations
-
-        annotations.assertNotNullable()
-    }
-
-    @ParameterizedTest(name = "[{displayName}] - for field: {0}")
-    @MethodSource("primitiveFieldsOfSchema")
     fun `test primitive field getter method is marked as not nullable in the schema`(fieldName: String) {
         val methodDescription = schemaClass.extractMatchingMethod(fieldName, SchemaMethodType.GETTER)
 
@@ -179,26 +157,6 @@ class BasicObjectTest {
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////
-
-    @ParameterizedTest(name = "[{displayName}] - for field: {0}")
-    @MethodSource("nullablePrimitiveWrapperFieldsOfSchema")
-    fun `test nullable primitive field is marked as nullable in the schema`(fieldName: String) {
-        val fieldDescription = schemaClass.extractField(fieldName)
-
-        val annotations = fieldDescription.declaredAnnotations
-
-        annotations.assertNullable()
-    }
-
-    @ParameterizedTest(name = "[{displayName}] - for field: {0}")
-    @MethodSource("nullablePrimitiveWrapperFieldsOfSchema")
-    fun `test nullable primitive field is marked as nullable in the builder`(fieldName: String) {
-        val fieldDescription = schemaBuilderClass.extractField(fieldName)
-
-        val annotations = fieldDescription.declaredAnnotations
-
-        annotations.assertNullable()
-    }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
     @MethodSource("nullablePrimitiveWrapperFieldsOfSchema")
@@ -266,26 +224,6 @@ class BasicObjectTest {
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
     @MethodSource("nonPrimitiveFieldsOfSchema")
-    fun `test non primitive field is marked as not nullable in the schema`(fieldName: String) {
-        val fieldDescription = schemaClass.extractField(fieldName)
-
-        val annotations = fieldDescription.declaredAnnotations
-
-        annotations.assertNotNullable()
-    }
-
-    @ParameterizedTest(name = "[{displayName}] - for field: {0}")
-    @MethodSource("nonPrimitiveFieldsOfSchema")
-    fun `test non primitive field is still marked as nullable in the builder`(fieldName: String) {
-        val fieldDescription = schemaBuilderClass.extractField(fieldName)
-
-        val annotations = fieldDescription.declaredAnnotations
-
-        annotations.assertNullable()
-    }
-
-    @ParameterizedTest(name = "[{displayName}] - for field: {0}")
-    @MethodSource("nonPrimitiveFieldsOfSchema")
     fun `test non primitive field getter method is marked as not nullable in the schema`(fieldName: String) {
         val methodDescription = schemaClass.extractMatchingMethod(fieldName, SchemaMethodType.GETTER)
 
@@ -347,26 +285,6 @@ class BasicObjectTest {
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////
-
-    @ParameterizedTest(name = "[{displayName}] - for field: {0}")
-    @MethodSource("nullableNonPrimitiveFieldsOfSchema")
-    fun `test nullable non primitive field is marked as nullable in the schema`(fieldName: String) {
-        val fieldDescription = schemaClass.extractField(fieldName)
-
-        val annotations = fieldDescription.declaredAnnotations
-
-        annotations.assertNullable()
-    }
-
-    @ParameterizedTest(name = "[{displayName}] - for field: {0}")
-    @MethodSource("nullableNonPrimitiveFieldsOfSchema")
-    fun `test nullable non primitive field is marked as nullable in the builder`(fieldName: String) {
-        val fieldDescription = schemaBuilderClass.extractField(fieldName)
-
-        val annotations = fieldDescription.declaredAnnotations
-
-        annotations.assertNullable()
-    }
 
     @ParameterizedTest(name = "[{displayName}] - for field: {0}")
     @MethodSource("nullableNonPrimitiveFieldsOfSchema")

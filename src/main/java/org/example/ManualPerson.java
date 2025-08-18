@@ -1,10 +1,12 @@
 package org.example;
 
+import lombok.AllArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
+@AllArgsConstructor
 public class ManualPerson {
     @NotNull
     private String id;
