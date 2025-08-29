@@ -1,4 +1,5 @@
 import com.example.testsuite.*
+import org.example.AAA
 import org.junit.jupiter.api.Test
 
 @Suppress("UNUSED_VARIABLE", "USELESS_CAST")
@@ -107,77 +108,123 @@ class UsageTest {
         listsObject.nullableListWithNullableListWithRegularValues = nullableListWithNullableListWithRegularValuesVariable
         listsObject.nullableListWithNullableListWithNullableValues = nullableListWithNullableListWithNullableValuesVariable
     }
+//
+//    @Test
+//    fun `test bad conversions of list`() {
+//        val listsObject = ListsObject.newBuilder()
+//            .setListWithRegularValues(listOf(1))
+//            .setNullableListWithRegularValues(listOf(2))
+//            .setListWithNullableValues(listOf(10))
+//            .setNullableListWithNullableValues(listOf(20))
+//            .setListWithRegularListWithRegularValues(listOf(listOf(3)))
+//            .setListWithRegularListWithNullableValues(listOf(listOf(30)))
+//            .setListWithNullableListWithRegularValues(listOf(listOf(4)))
+//            .setListWithNullableListWithNullableValues(listOf(listOf(40)))
+//            .setNullableListWithRegularListWithRegularValues(listOf(listOf(5)))
+//            .setNullableListWithRegularListWithNullableValues(listOf(listOf(50)))
+//            .setNullableListWithNullableListWithRegularValues(listOf(listOf(6)))
+//            .setNullableListWithNullableListWithNullableValues(listOf(listOf(60)))
+//            .build()
+//
+//        val listWithRegularValuesVariable: MutableList<Int> = listsObject.listWithRegularValues
+//        val nullableListWithRegularValuesVariable: MutableList<Int>? = listsObject.nullableListWithRegularValues
+//        val listWithNullableValuesVariable: MutableList<Int?> = listsObject.listWithNullableValues
+//        val nullableListWithNullableValuesVariable: MutableList<Int?>? = listsObject.nullableListWithNullableValues
+//        val listWithRegularListWithRegularValuesVariable: MutableList<MutableList<Int>> =
+//            listsObject.listWithRegularListWithRegularValues
+//        val listWithRegularListWithNullableValuesVariable: MutableList<MutableList<Int?>> =
+//            listsObject.listWithRegularListWithNullableValues
+//        val listWithNullableListWithRegularValuesVariable: MutableList<MutableList<Int>?> =
+//            listsObject.listWithNullableListWithRegularValues
+//        val listWithNullableListWithNullableValuesVariable: MutableList<MutableList<Int?>?> =
+//            listsObject.listWithNullableListWithNullableValues
+//        val nullableListWithRegularListWithRegularValuesVariable: MutableList<MutableList<Int>>? =
+//            listsObject.nullableListWithRegularListWithRegularValues
+//        val nullableListWithRegularListWithNullableValuesVariable: MutableList<MutableList<Int?>>? =
+//            listsObject.nullableListWithRegularListWithNullableValues
+//        val nullableListWithNullableListWithRegularValuesVariable: MutableList<MutableList<Int>?>? =
+//            listsObject.nullableListWithNullableListWithRegularValues
+//        val nullableListWithNullableListWithNullableValuesVariable: MutableList<MutableList<Int?>?>? =
+//            listsObject.nullableListWithNullableListWithNullableValues
+//
+//        // Test begins here
+//
+//        val listWithRegularValuesWrongType1: MutableList<Int?> = listWithRegularValuesVariable
+//        val listWithRegularValuesWrongType2: MutableList<Int>? = listWithRegularValuesVariable
+//        val listWithRegularValuesWrongType3: MutableList<Int?>? = listWithRegularValuesVariable
+//
+//        listsObject.listWithRegularValues = listWithNullableValuesVariable
+//        listsObject.listWithRegularValues = nullableListWithRegularValuesVariable
+//        listsObject.listWithRegularValues = nullableListWithNullableValuesVariable
+//
+//        val listWithNullableValuesWrongType1: MutableList<Int> = listWithNullableValuesVariable
+//        val listWithNullableValuesWrongType2: MutableList<Int>? = listWithNullableValuesVariable
+//        val listWithNullableValuesWrongType3: MutableList<Int?>? = listWithNullableValuesVariable
+//
+//        listsObject.listWithNullableValues = listWithRegularValuesVariable
+//        listsObject.listWithNullableValues = nullableListWithRegularValuesVariable
+//        listsObject.listWithNullableValues = nullableListWithNullableValuesVariable
+//
+//        val nullableListWithRegularValuesWrongType1: MutableList<Int> = nullableListWithRegularValuesVariable
+//        val nullableListWithRegularValuesWrongType2: MutableList<Int?> = nullableListWithRegularValuesVariable
+//        val nullableListWithRegularValuesWrongType3: MutableList<Int?>? = nullableListWithRegularValuesVariable
+//
+//        // listsObject.nullableListWithRegularValues = listWithRegularValuesVariable -> allowed
+//        listsObject.nullableListWithRegularValues = listWithNullableValuesVariable
+//        listsObject.nullableListWithRegularValues = nullableListWithNullableValuesVariable
+//
+//        val nullableListWithNullableValuesWrongType1: MutableList<Int> = nullableListWithNullableValuesVariable
+//        val nullableListWithNullableValuesWrongType2: MutableList<Int?> = nullableListWithNullableValuesVariable
+//        val nullableListWithNullableValuesWrongType3: MutableList<Int>? = nullableListWithNullableValuesVariable
+//
+//        listsObject.nullableListWithNullableValues = listWithRegularValuesVariable
+//        // listsObject.nullableListWithNullableValues = listWithNullableValuesVariable -> allowed
+//        listsObject.nullableListWithNullableValues = nullableListWithRegularValuesVariable
+//    }
 
     @Test
-    fun `test bad conversions of list`() {
-        val listsObject = ListsObject.newBuilder()
-            .setListWithRegularValues(listOf(1))
-            .setNullableListWithRegularValues(listOf(2))
-            .setListWithNullableValues(listOf(10))
-            .setNullableListWithNullableValues(listOf(20))
-            .setListWithRegularListWithRegularValues(listOf(listOf(3)))
-            .setListWithRegularListWithNullableValues(listOf(listOf(30)))
-            .setListWithNullableListWithRegularValues(listOf(listOf(4)))
-            .setListWithNullableListWithNullableValues(listOf(listOf(40)))
-            .setNullableListWithRegularListWithRegularValues(listOf(listOf(5)))
-            .setNullableListWithRegularListWithNullableValues(listOf(listOf(50)))
-            .setNullableListWithNullableListWithRegularValues(listOf(listOf(6)))
-            .setNullableListWithNullableListWithNullableValues(listOf(listOf(60)))
+    fun `v2`() {
+        val aaa = AAA.builder()
+            .v1("1")
+            .v2(null)
+            .v3(listOf("111"))
+            .v4(listOf(null))
             .build()
 
-        val listWithRegularValuesVariable: MutableList<Int> = listsObject.listWithRegularValues
-        val nullableListWithRegularValuesVariable: MutableList<Int>? = listsObject.nullableListWithRegularValues
-        val listWithNullableValuesVariable: MutableList<Int?> = listsObject.listWithNullableValues
-        val nullableListWithNullableValuesVariable: MutableList<Int?>? = listsObject.nullableListWithNullableValues
-        val listWithRegularListWithRegularValuesVariable: MutableList<MutableList<Int>> =
-            listsObject.listWithRegularListWithRegularValues
-        val listWithRegularListWithNullableValuesVariable: MutableList<MutableList<Int?>> =
-            listsObject.listWithRegularListWithNullableValues
-        val listWithNullableListWithRegularValuesVariable: MutableList<MutableList<Int>?> =
-            listsObject.listWithNullableListWithRegularValues
-        val listWithNullableListWithNullableValuesVariable: MutableList<MutableList<Int?>?> =
-            listsObject.listWithNullableListWithNullableValues
-        val nullableListWithRegularListWithRegularValuesVariable: MutableList<MutableList<Int>>? =
-            listsObject.nullableListWithRegularListWithRegularValues
-        val nullableListWithRegularListWithNullableValuesVariable: MutableList<MutableList<Int?>>? =
-            listsObject.nullableListWithRegularListWithNullableValues
-        val nullableListWithNullableListWithRegularValuesVariable: MutableList<MutableList<Int>?>? =
-            listsObject.nullableListWithNullableListWithRegularValues
-        val nullableListWithNullableListWithNullableValuesVariable: MutableList<MutableList<Int?>?>? =
-            listsObject.nullableListWithNullableListWithNullableValues
+        val v1Var: String = aaa.v1
+        val v2Var: String? = aaa.v2
+        val v3Var: List<String> = aaa.v3
+        val v4Var: List<String?> = aaa.v4
 
-        // Test begins here
+//        // Test begins here
+//
+//        val v1Wrong: String? = v1Var
+//
+//        aaa.v1 = v2Var
+//
+//        val v2Wrong: String = v2Var
+//
+//        aaa.v2 = v1Var
+//
+//        val v3Wrong1: List<String?> = v3Var
+//        val v3Wrong2: List<String>? = v3Var
+//        val v3Wrong3: List<String?>? = v3Var
+//
+//        aaa.v3 = v3Wrong1
+//        aaa.v3 = v3Wrong2
+//        aaa.v3 = v3Wrong3
+//
+//        val v4Wrong1: List<String> = v4Var
+//        val v4Wrong2: List<String>? = v4Var
+//        val v4Wrong3: List<String?>? = v4Var
 
-        val listWithRegularValuesWrongType1: MutableList<Int?> = listWithRegularValuesVariable
-        val listWithRegularValuesWrongType2: MutableList<Int>? = listWithRegularValuesVariable
-        val listWithRegularValuesWrongType3: MutableList<Int?>? = listWithRegularValuesVariable
+        val v4try1: List<String> = listOf("1")
+        val v4try2: List<String>? = null
+        val v4try3: List<String?>? = null
 
-        listsObject.listWithRegularValues = listWithNullableValuesVariable
-        listsObject.listWithRegularValues = nullableListWithRegularValuesVariable
-        listsObject.listWithRegularValues = nullableListWithNullableValuesVariable
 
-        val listWithNullableValuesWrongType1: MutableList<Int> = listWithNullableValuesVariable
-        val listWithNullableValuesWrongType2: MutableList<Int>? = listWithNullableValuesVariable
-        val listWithNullableValuesWrongType3: MutableList<Int?>? = listWithNullableValuesVariable
-
-        listsObject.listWithNullableValues = listWithRegularValuesVariable
-        listsObject.listWithNullableValues = nullableListWithRegularValuesVariable
-        listsObject.listWithNullableValues = nullableListWithNullableValuesVariable
-
-        val nullableListWithRegularValuesWrongType1: MutableList<Int> = nullableListWithRegularValuesVariable
-        val nullableListWithRegularValuesWrongType2: MutableList<Int?> = nullableListWithRegularValuesVariable
-        val nullableListWithRegularValuesWrongType3: MutableList<Int?>? = nullableListWithRegularValuesVariable
-
-        // listsObject.nullableListWithRegularValues = listWithRegularValuesVariable -> allowed
-        listsObject.nullableListWithRegularValues = listWithNullableValuesVariable
-        listsObject.nullableListWithRegularValues = nullableListWithNullableValuesVariable
-
-        val nullableListWithNullableValuesWrongType1: MutableList<Int> = nullableListWithNullableValuesVariable
-        val nullableListWithNullableValuesWrongType2: MutableList<Int?> = nullableListWithNullableValuesVariable
-        val nullableListWithNullableValuesWrongType3: MutableList<Int>? = nullableListWithNullableValuesVariable
-
-        listsObject.nullableListWithNullableValues = listWithRegularValuesVariable
-        // listsObject.nullableListWithNullableValues = listWithNullableValuesVariable -> allowed
-        listsObject.nullableListWithNullableValues = nullableListWithRegularValuesVariable
+        aaa.v4 = v4try1
+        aaa.v4 = v4try2
+        aaa.v4 = v4try3
     }
 }
