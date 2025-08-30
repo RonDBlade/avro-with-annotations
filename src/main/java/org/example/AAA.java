@@ -17,12 +17,12 @@ import java.util.List;
 public class AAA {
 
     private String v1;
-    private @Nullable String v2;
+//    private @Nullable String v2;
     private List<String> v3;
-    private List<@Nullable String> v4;
+    private List<@org.jetbrains.annotations.Nullable String> v4;
 
 //    private @NotNull String v1;
-//    private @org.jetbrains.annotations.Nullable String v2;
+    private @org.jetbrains.annotations.Nullable String v2;
 //    private @NotNull List<@NotNull String> v3;
 //    private @NotNull List<@org.jetbrains.annotations.Nullable String> v4;
 }

@@ -107,6 +107,21 @@ class UsageTest {
         listsObject.nullableListWithRegularListWithNullableValues = nullableListWithRegularListWithNullableValuesVariable
         listsObject.nullableListWithNullableListWithRegularValues = nullableListWithNullableListWithRegularValuesVariable
         listsObject.nullableListWithNullableListWithNullableValues = nullableListWithNullableListWithNullableValuesVariable
+
+
+        val x1 = listsObject.listWithRegularValues
+        val x2 = listsObject.nullableListWithRegularValues
+        val x3 = listsObject.listWithNullableValues
+        val x4: MutableList<Int?>? = listsObject.nullableListWithNullableValues
+        val x5 = listsObject.listWithRegularListWithRegularValues
+        val x6 = listsObject.listWithRegularListWithNullableValues
+        val x7 = listsObject.listWithNullableListWithRegularValues
+        val x8 = listsObject.listWithNullableListWithNullableValues
+        val x9 = listsObject.nullableListWithRegularListWithRegularValues
+        val x10 = listsObject.nullableListWithRegularListWithNullableValues
+        val x11 = listsObject.nullableListWithNullableListWithRegularValues
+        val x12 = listsObject.nullableListWithNullableListWithNullableValues
+
     }
 //
 //    @Test
@@ -226,5 +241,15 @@ class UsageTest {
         aaa.v4 = v4try1
         aaa.v4 = v4try2
         aaa.v4 = v4try3
+
+        val v3try1: List<String?> = listOf(null)
+        val v3try2: List<String>? = null
+        val v3try3: List<String?>? = null
+
+        aaa.v3 = v3try1
+        aaa.v3 = v3try2
+        aaa.v3 = v3try3
+
+        aaa.v1 = null
     }
 }
