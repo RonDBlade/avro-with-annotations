@@ -76,7 +76,6 @@ public class AvroClassProcessor {
                     if (avroField != null) {
                         // Working on the actual schema class fields
                         boolean isNullable = isNullable(avroField.schema());
-                        addNullabilityAnnotation(field, isNullable);
 
                         String getterName = "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
                         cu.findAll(MethodDeclaration.class).stream()
@@ -109,7 +108,6 @@ public class AvroClassProcessor {
                                     .map(setterArgument -> setterArgument.getType().asClassOrInterfaceType().getTypeArguments().get())
                                     .findFirst().get();
 
-                            addAnnotationsToTemplatesInRecursion(avroField.schema(), fieldTypeTemplates);
                             addAnnotationsToTemplatesInRecursion(avroField.schema(), getterReturnTypeTemplates);
                             addAnnotationsToTemplatesInRecursion(avroField.schema(), setterParameterTypeTemplates);
                         }
@@ -119,7 +117,6 @@ public class AvroClassProcessor {
                     if (avroField != null) {
                         // Fields in the builder from the schema
                         boolean isNullable = !field.getCommonType().isPrimitiveType();
-                        addNullabilityAnnotation(field, isNullable);
 
                         String getterName = "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
                         cu.findAll(MethodDeclaration.class).stream()
@@ -147,7 +144,6 @@ public class AvroClassProcessor {
 
                         if (isTemplatedType(avroField)) {
                             // Templates
-                            NodeList<Type> fieldTypeTemplates = field.getCommonType().asClassOrInterfaceType().getTypeArguments().get();
                             NodeList<Type> getterReturnTypeTemplates = cu.findAll(MethodDeclaration.class).stream()
                                     .filter(method -> !isTopLevel(method))
                                     .filter(builderMethod -> builderMethod.getNameAsString().equals(getterName) && builderMethod.getParameters().isEmpty())
@@ -160,14 +156,12 @@ public class AvroClassProcessor {
                                     .map(setterArgument -> setterArgument.getType().asClassOrInterfaceType().getTypeArguments().get())
                                     .findFirst().get();
 
-                            addAnnotationsToTemplatesInRecursion(avroField.schema(), fieldTypeTemplates);
                             addAnnotationsToTemplatesInRecursion(avroField.schema(), getterReturnTypeTemplates);
                             addAnnotationsToTemplatesInRecursion(avroField.schema(), setterParameterTypeTemplates);
                         }
                     } else {
                         // The additional builder fields. Meaning, those who end with the word "builder"
                         boolean isNullable = true;
-                        addNullabilityAnnotation(field, isNullable);
 
                         String getterName = "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
                         cu.findAll(MethodDeclaration.class).stream()
